@@ -14,6 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Aspire\RetailPortal.Aspire.ServiceDefaults\RetailPortal.Aspire.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\Source\Infrastructure\RetailPortal.Infrastructure\RetailPortal.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Source\Service\RetailPortal.Service\RetailPortal.Service.csproj" />
   </ItemGroup>
 </Project>

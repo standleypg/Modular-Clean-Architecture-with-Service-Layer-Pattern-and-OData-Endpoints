@@ -1,44 +1,54 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
-using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using RetailPortal.Api.Common.Http;
-using RetailPortal.Api.Controllers.Common;
-using RetailPortal.Application.Products.Commands.CreateProduct;
-using RetailPortal.Application.Products.Queries.GetAllProduct;
-using RetailPortal.Domain.Entities;
-using RetailPortal.Shared.DTOs.Common;
-using RetailPortal.Shared.DTOs.Product;
+using RetailPortal.Model.Db.Entities;
+using RetailPortal.Model.DTOs.Common;
+using RetailPortal.Model.DTOs.Product;
+using RetailPortal.ServiceFacade.Product;
 
 namespace RetailPortal.Api.Controllers;
 
 [ApiVersion("0.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/products")]
-public class ProductController(ISender sender, IMapper mapper) : ODataBaseController
+[AllowAnonymous] //TODO: Remove AllowAnonymous when auth is implemented
+public class ProductController(IMapper mapper, IProductService productService) : ODataController
 {
     // ! This isn't working yet as the we need to provide CategoryId
     // ! Which is not implemented yet
     [HttpPost]
     public async Task<ActionResult> CreateProduct([FromBody] CreateProductRequest request)
     {
-        var result = await sender.Send(mapper.Map<CreateProductCommand>(request));
+        var result = await productService.CreateProduct(request);
 
-        return result.Match(
-            product => this.Ok(mapper.Map<ProductResponse>(product)),
-            this.Problem
-        );
+        return this.Ok(mapper.Map<ProductResponse>(result));
     }
 
     [HttpGet]
     public async Task<ActionResult> GetAllProducts()
     {
         var options = this.Request.GetODataQueryOptions<Product>();
-        var result = await sender.Send(mapper.Map<GetAllProductCommand>(options));
+        var result = await productService.GetAllProduct(mapper.Map<GetAllProductRequest>(options));
 
-        return result.Match(
-            product => this.Ok(mapper.Map<ODataResponse<ProductResponse>>(product)),
-            this.Problem
-        );
+        //TODO: map this mapping using mapper
+        return this.Ok(new ODataResponse<ProductResponse>()
+        {
+            Count = result.Count,
+            NextPage = result.NextPage,
+            Value = (result.Value ?? new List<Product>())
+                .Select(product => new ProductResponse(
+                    product.Id,
+                    product.Name,
+                    product.Description,
+                    new Price(product.Price.Value, product.Price.Currency),
+                    product.Quantity,
+                    product.ImageUrl,
+                    product.Category,
+                    product.UserId
+                )).ToList()
+        });
     }
 }

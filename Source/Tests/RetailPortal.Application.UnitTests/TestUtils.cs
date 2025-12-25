@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.OData.UriParser;
-using RetailPortal.Domain.Entities.Common.Base;
+using RetailPortal.Model.Db.Entities.Common.Base;
 
 namespace RetailPortal.Unit;
 

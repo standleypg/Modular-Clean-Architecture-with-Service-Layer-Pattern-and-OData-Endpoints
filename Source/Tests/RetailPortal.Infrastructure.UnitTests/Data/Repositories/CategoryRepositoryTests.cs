@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using RetailPortal.Domain.Entities;
 using RetailPortal.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
+using RetailPortal.Model.Db.Entities;
 
 namespace RetailPortal.Infrastructure.UnitTests.Data.Repositories;
 

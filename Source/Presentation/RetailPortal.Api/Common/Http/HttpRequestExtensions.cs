@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Collections.Concurrent;
@@ -18,6 +19,14 @@ internal static class HttpRequestExtensions
             typeof(T),
             path
         );
+
+        // Include $count=false by default if not specified in the request
+        var queryCollection = QueryHelpers.ParseQuery(request.QueryString.ToString());
+        if (!queryCollection.ContainsKey("$count"))
+        {
+            var modifiedQuery = QueryHelpers.AddQueryString(request.QueryString.ToString(), "$count", "false");
+            request.QueryString = new QueryString(modifiedQuery);
+        }
 
         // Create and validate the query options.
         return new ODataQueryOptions<T>(queryContext, request);

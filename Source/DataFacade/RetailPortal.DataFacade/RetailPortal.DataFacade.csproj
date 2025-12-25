@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\RetailPortal.Model\RetailPortal.Model.csproj" />
+  </ItemGroup>
+  
+</Project>

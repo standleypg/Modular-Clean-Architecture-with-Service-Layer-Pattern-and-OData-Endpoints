@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using RetailPortal.Application.Services.Role;
-using RetailPortal.Domain.Interfaces.Infrastructure.Data.Repositories;
-using RetailPortal.Domain.Interfaces.Infrastructure.Data.UnitOfWork;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Data.Repositories;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
-using RetailPortal.Shared.Constants;
+using RetailPortal.Model.Constants;
 
 namespace RetailPortal.Unit.Services.Role;
 
@@ -64,11 +64,11 @@ public sealed class RoleServiceTests : IDisposable
         await Assert.ThrowsAsync<InvalidOperationException>(act);
     }
 
-    private Task<IQueryable<Domain.Entities.Role>> CreateQueryableRoleMockEntities()
+    private Task<IQueryable<Model.Db.Entities.Role>> CreateQueryableRoleMockEntities()
     {
         var roles = (from role in Enum.GetValues<Roles>()
             where role != Roles.Seller
-            select Domain.Entities.Role.Create(role.ToString(), $"{role} role")).ToList();
+            select Model.Db.Entities.Role.Create(role.ToString(), $"{role} role")).ToList();
         return this._repositoryUtils.CreateQueryableMockEntities(
             roles,
             uow => uow.RoleRepository

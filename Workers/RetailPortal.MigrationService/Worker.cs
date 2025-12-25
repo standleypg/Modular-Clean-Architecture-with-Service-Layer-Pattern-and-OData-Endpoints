@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using OpenTelemetry.Trace;
-using RetailPortal.Infrastructure.Data.Context;
+using RetailPortal.Data.Db.Context;
 
 namespace RetailPortal.MigrationService;
 

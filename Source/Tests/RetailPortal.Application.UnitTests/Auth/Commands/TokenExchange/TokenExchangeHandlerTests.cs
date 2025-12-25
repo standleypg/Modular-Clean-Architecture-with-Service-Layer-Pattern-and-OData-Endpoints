@@ -1,10 +1,11 @@
 using Moq;
 using RetailPortal.Application.Auth.Commands.TokenExchange;
-using RetailPortal.Domain.Entities;
-using RetailPortal.Domain.Interfaces.Application.Services;
-using RetailPortal.Domain.Interfaces.Infrastructure.Auth;
-using RetailPortal.Domain.Interfaces.Infrastructure.Data.UnitOfWork;
-using RetailPortal.Shared.Constants;
+using RetailPortal.DataFacade.Interfaces.Application.Services;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Auth;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Data.UnitOfWork;
+using RetailPortal.Model.Constants;
+using RetailPortal.Model.Db.Entities;
+using RetailPortal.Model.DTOs.Auth;
 
 namespace RetailPortal.Unit.Auth.Commands.TokenExchange;
 
@@ -59,9 +60,9 @@ public class TokenExchangeHandlerTests
         Assert.Equal("token", result.Value.Token);
     }
 
-    private static (User, TokenExchangeCommand) CreateUser()
+    private static (User, TokenExchangeRequest) CreateUser()
     {
-        var request = new TokenExchangeCommand("JohnDoe@email.com", "John Doe", "Google");
+        var request = new TokenExchangeRequest("JohnDoe@email.com", "John Doe", "Google");
         var name = request.Name.AsSpan();
         return (
             User.Create(name[..name.IndexOf(' ')].ToString(), name[name.IndexOf(' ')..].ToString(), request.Email,

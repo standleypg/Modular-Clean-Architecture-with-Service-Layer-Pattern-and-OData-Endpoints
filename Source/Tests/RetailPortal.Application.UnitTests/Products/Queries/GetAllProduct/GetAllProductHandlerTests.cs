@@ -1,9 +1,11 @@
 using Moq;
 using RetailPortal.Application.Products.Queries.GetAllProduct;
-using RetailPortal.Domain.Entities;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Data.Repositories;
+using RetailPortal.DataFacade.Interfaces.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Domain.Interfaces.Infrastructure.Data.Repositories;
 using RetailPortal.Domain.Interfaces.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
+using RetailPortal.Model.Db.Entities;
 
 namespace RetailPortal.Unit.Products.Queries.GetAllProduct;
 
