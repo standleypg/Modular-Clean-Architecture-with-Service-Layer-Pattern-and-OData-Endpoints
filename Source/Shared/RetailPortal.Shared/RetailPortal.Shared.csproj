@@ -2,8 +2,8 @@
   <PropertyGroup>
     <RootNamespace>RetailPortal.Shared</RootNamespace>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <ProjectReference Include="..\RetailPortal.Model\RetailPortal.Model.csproj" />
   </ItemGroup>
 </Project>

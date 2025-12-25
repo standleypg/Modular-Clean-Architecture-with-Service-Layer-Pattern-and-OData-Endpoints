@@ -23,9 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Aspire\RetailPortal.Aspire.ServiceDefaults\RetailPortal.Aspire.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\Core\RetailPortal.Application\RetailPortal.Application.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\RetailPortal.Infrastructure\RetailPortal.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Shared\RetailPortal.Shared\RetailPortal.Shared.csproj" />
+    <ProjectReference Include="..\..\RetailPortal.ApiConfiguration\RetailPortal.ApiConfiguration.csproj" />
   </ItemGroup>
 
       <Target Name="GenerateTypeScript" AfterTargets="Build">

@@ -1,10 +1,9 @@
-using RetailPortal.Domain.Entities;
-using RetailPortal.Domain.Entities.Common.Base;
-using RetailPortal.Domain.Entities.Common.ValueObjects;
 using RetailPortal.Domain.Interfaces.Infrastructure.Data.Repositories;
 using RetailPortal.Domain.Interfaces.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Infrastructure.Data.UnitOfWork;
-using RetailPortal.Shared.Constants;
+using RetailPortal.Model.Db.Entities;
+using RetailPortal.Model.Db.Entities.Common.Base;
+using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 
 namespace RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
 

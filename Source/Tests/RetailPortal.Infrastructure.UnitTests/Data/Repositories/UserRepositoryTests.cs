@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using RetailPortal.Domain.Entities;
-using RetailPortal.Domain.Entities.Common.ValueObjects;
 using RetailPortal.Infrastructure.Data.UnitOfWork;
 using RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
+using RetailPortal.Model.Db.Entities;
+using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 
 namespace RetailPortal.Infrastructure.UnitTests.Data.Repositories;
 

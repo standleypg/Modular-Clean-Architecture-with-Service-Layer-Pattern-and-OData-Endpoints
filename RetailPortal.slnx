@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/Aspire/">
+    <Project Path="Aspire/RetailPortal.Aspire.AppHost/RetailPortal.Aspire.AppHost.csproj" />
+    <Project Path="Aspire/RetailPortal.Aspire.ServiceDefaults/RetailPortal.Aspire.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Docker/">
+    <Project Path="Docker/docker-compose.dcproj">
+      <Build />
+    </Project>
+  </Folder>
+  <Folder Name="/Source/">
+    <Project Path="Source/CodeGen/CodeGen.csproj" />
+    <Project Path="Source/RetailPortal.ApiConfiguration/RetailPortal.ApiConfiguration.csproj" />
+  </Folder>
+  <Folder Name="/Source/Data/">
+    <Project Path="Source/Data/Data/Data.csproj" />
+  </Folder>
+  <Folder Name="/Source/DataFacade/">
+    <Project Path="Source/DataFacade/RetailPortal.DataFacade/RetailPortal.DataFacade.csproj" />
+  </Folder>
+  <Folder Name="/Source/Infrastructure/">
+    <Project Path="Source/Infrastructure/RetailPortal.Infrastructure/RetailPortal.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Source/Presentation/">
+    <Project Path="Source/Presentation/App/RetailPortal.app.esproj">
+      <Build />
+    </Project>
+    <Project Path="Source/Presentation/RetailPortal.Api/RetailPortal.Api.csproj" />
+  </Folder>
+  <Folder Name="/Source/Shared/">
+    <Project Path="Source/Shared/RetailPortal.Model/RetailPortal.Model.csproj" />
+    <Project Path="Source/Shared/RetailPortal.Shared/RetailPortal.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Source/Service/">
+    <Project Path="Source/Service/RetailPortal.Service/RetailPortal.Service.csproj" />
+  </Folder>
+  <Folder Name="/Source/ServiceFacade/">
+    <Project Path="Source/ServiceFacade/RetailPortal.ServiceFacade/RetailPortal.ServiceFacade.csproj" />
+  </Folder>
+<!--  <Folder Name="/Source/Tests/">-->
+<!--    <Project Path="Source/Tests/RetailPortal.Application.UnitTests/RetailPortal.Application.UnitTests.csproj" />-->
+<!--    <Project Path="Source/Tests/RetailPortal.Infrastructure.UnitTests/RetailPortal.Infrastructure.UnitTests.csproj" />-->
+<!--  </Folder>-->
+  <Folder Name="/Workers/">
+    <Project Path="Workers/RetailPortal.MigrationService/RetailPortal.MigrationService.csproj" />
+  </Folder>
+</Solution>

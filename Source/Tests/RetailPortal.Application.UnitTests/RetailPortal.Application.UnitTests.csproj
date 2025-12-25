@@ -20,8 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\RetailPortal.Application\RetailPortal.Application.csproj" />
-    <ProjectReference Include="..\..\Core\RetailPortal.Domain\RetailPortal.Domain.csproj" />
+    <ProjectReference Include="..\..\DataFacade\RetailPortal.DataFacade\RetailPortal.DataFacade.csproj" />
     <ProjectReference Include="..\..\Infrastructure\RetailPortal.Infrastructure\RetailPortal.Infrastructure.csproj" />
     <ProjectReference Include="..\RetailPortal.Infrastructure.UnitTests\RetailPortal.Infrastructure.UnitTests.csproj" />
   </ItemGroup>

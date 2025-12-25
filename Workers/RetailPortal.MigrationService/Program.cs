@@ -1,7 +1,7 @@
 using RetailPortal.Aspire.ServiceDefaults;
-using RetailPortal.Infrastructure.Data.Context;
+using RetailPortal.Data.Db.Context;
 using RetailPortal.MigrationService;
-using RetailPortal.Shared.Constants;
+using RetailPortal.Model.Constants;
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RetailPortal.ServiceFacade</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\DataFacade\RetailPortal.DataFacade\RetailPortal.DataFacade.csproj" />
+  </ItemGroup>
+
+</Project>

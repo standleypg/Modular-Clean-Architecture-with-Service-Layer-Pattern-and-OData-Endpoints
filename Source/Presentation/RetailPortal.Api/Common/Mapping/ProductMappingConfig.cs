@@ -1,11 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.OData.Query;
-using RetailPortal.Application.Products.Commands.CreateProduct;
-using RetailPortal.Application.Products.Queries.GetAllProduct;
-using RetailPortal.Domain.Entities;
-using RetailPortal.Shared.DTOs;
-using RetailPortal.Shared.DTOs.Common;
-using RetailPortal.Shared.DTOs.Product;
+using RetailPortal.Model.Db.Entities;
+using RetailPortal.Model.DTOs.Common;
+using RetailPortal.Model.DTOs.Product;
 
 namespace RetailPortal.Api.Common.Mapping;
 
@@ -13,15 +10,15 @@ public class ProductMappingConfig : Profile
 {
     public ProductMappingConfig()
     {
-        this.CreateMap<CreateProductRequest, CreateProductCommand>();
+        this.CreateMap<CreateProductRequest, CreateProductRequest>();
 
            this.CreateMap<Product, ProductResponse>()
-               .ConstructUsing(product => new ProductResponse(product.Id, product.Name, product.Description, new Price(product.Price.Value, product.Price.Currency), product.Quantity, product.ImageUrl, product.CategoryId, product.SellerId));
+               .ConstructUsing(product => new ProductResponse(product.Id, product.Name, product.Description, new Price(product.Price.Value, product.Price.Currency), product.Quantity, product.ImageUrl, product.Category, product.User.Id));
 
-           this.CreateMap<ODataQueryOptions<Product>, GetAllProductCommand>()
-               .ConstructUsing(options => new GetAllProductCommand(options));
+           this.CreateMap<ODataQueryOptions<Product>, GetAllProductRequest>()
+               .ConstructUsing(options => new GetAllProductRequest(options));
 
-           this.CreateMap<Domain.Entities.Common.ValueObjects.Price, Price>()
+           this.CreateMap<Model.Db.Entities.Common.ValueObjects.Price, Price>()
                .ConstructUsing(price => new Price(price.Value, price.Currency));
 
            this.CreateMap<ODataResponse<Product>, ODataResponse<ProductResponse>>()
@@ -37,8 +34,8 @@ public class ProductMappingConfig : Profile
                              new Price(product.Price.Value, product.Price.Currency),
                              product.Quantity,
                              product.ImageUrl,
-                             product.CategoryId,
-                             product.SellerId
+                             product.Category,
+                             product.UserId
                          )).ToList()
                });
     }

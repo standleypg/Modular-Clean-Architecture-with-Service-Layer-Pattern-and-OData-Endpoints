@@ -41,7 +41,7 @@ public class TypeScriptGenerator
             return;
         }
 
-        var sharedAssembly = Assembly.Load("RetailPortal.Shared");
+        var sharedAssembly = Assembly.Load("RetailPortal.Model");
 
         var modelBuilder = new TsModelBuilder();
 

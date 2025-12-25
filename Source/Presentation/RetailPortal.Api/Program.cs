@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.OData;
-using Microsoft.IdentityModel.Logging;
 using RetailPortal.Api;
-using RetailPortal.Application;
 using RetailPortal.Aspire.ServiceDefaults;
-using RetailPortal.Infrastructure;
+using RetailPortal.Data;
+using RetailPortal.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +11,9 @@ builder.AddServiceDefaults();
 var configuration = builder.Configuration;
 
 builder.Services
-    .AddApi(builder.Configuration)
+    .AddServiceCollections()
     .AddApplication()
-    .AddInfrastructure(configuration);
+    .AddData(configuration);
 
 builder.Services.AddControllers().AddOData(options =>
     options.Filter().Select().Expand().OrderBy().Count().SetMaxTop(1000)
@@ -24,7 +23,7 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-app.AddApi();
+await app.AddWebApplication();
 
 app.UseHttpsRedirection();
 

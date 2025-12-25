@@ -1,12 +1,7 @@
 ﻿using FluentValidation;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using RetailPortal.Application.Common;
-using RetailPortal.Application.Services.Role;
-using RetailPortal.Domain.Interfaces.Application.Services;
 using System.Reflection;
 
-namespace RetailPortal.Application;
 
 public static class ServiceCollectionsExtensions
 {
@@ -15,7 +10,8 @@ public static class ServiceCollectionsExtensions
         services.AddMediatR();
 
         services
-            .AddScoped<IRoleService, RoleService>();
+            .AddScoped<IRoleService, RoleService>()
+            .AddScoped<IRegisterService<RegisterCommand, AuthResult>, RegisterService>();
 
         return services;
     }

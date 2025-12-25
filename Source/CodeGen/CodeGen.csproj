@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shared\RetailPortal.Shared\RetailPortal.Shared.csproj" />
+      <ProjectReference Include="..\Shared\RetailPortal.Model\RetailPortal.Model.csproj" />
     </ItemGroup>
 
     <ItemGroup>
