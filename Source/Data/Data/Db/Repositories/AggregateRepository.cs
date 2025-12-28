@@ -4,11 +4,11 @@ using System.Linq.Expressions;
 
 namespace RetailPortal.Data.Db.Repositories;
 
-public class AggregateRepository<T>(DbSet<T> dbSet, IQueryable<T> aggregateQuery)
+public class AggregateRepository<T>(DbSet<T> dbSet, IQueryable<T>? aggregateQuery = null)
     : IAggregateRepository<T>
     where T : class
 {
-    public IQueryable<T> GetAll() => aggregateQuery;
+    public IQueryable<T> GetAll() => aggregateQuery ?? dbSet;
 
     public void Add(T entity) =>
         dbSet.Add(entity);

@@ -7,6 +7,7 @@ public interface IUnitOfWork : IDisposable
 {
     IAggregateRepository<User> Users { get; }
     IAggregateRepository<Product> Products { get; }
+    IAggregateRepository<Role> Roles { get; }
     /// <summary>
     /// Saves all changes to the database in a single transaction.
     /// </summary>

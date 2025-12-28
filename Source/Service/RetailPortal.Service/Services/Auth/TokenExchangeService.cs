@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using RetailPortal.DataFacade.Auth;
 using RetailPortal.DataFacade.Data.UnitOfWork;
 using RetailPortal.Model.Constants;
@@ -6,15 +7,12 @@ using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.Db.Entities.Common;
 using RetailPortal.Model.DTOs.Auth;
 using RetailPortal.Model.DTOs.Common;
-using RetailPortal.ServiceFacade;
 using RetailPortal.ServiceFacade.Auth;
-using RetailPortal.ServiceFacade.Role;
 
 namespace RetailPortal.Service.Services.Auth;
 
 public class TokenExchangeService(
     IUnitOfWork uow,
-    IRoleService roleService,
     IJwtTokenGenerator jwtTokenGenerator,
     IValidator<TokenExchangeRequest> validator) : ITokenExchangeService
 {
@@ -29,13 +27,12 @@ public class TokenExchangeService(
 
         if (uow.Users.GetAll().FirstOrDefault(u => u.Email == email) is not { } user)
         {
-            var role = await roleService.GetRoleByNameAsync(Roles.User);
+            var role = await uow.Roles.GetAll().FirstAsync(x => x.Name == nameof(Roles.User), cancellationToken: cancellationToken);
             var provider = request.TokenProvider.Contains(nameof(TokenProvider.Google), StringComparison.OrdinalIgnoreCase)
                 ? TokenProvider.Google
                 : TokenProvider.Azure;
             user = User.Create(firstName, lastName, email, provider);
 
-            uow.Attach(role);
             user.AddRole(role);
 
             uow.Users.Add(user);
