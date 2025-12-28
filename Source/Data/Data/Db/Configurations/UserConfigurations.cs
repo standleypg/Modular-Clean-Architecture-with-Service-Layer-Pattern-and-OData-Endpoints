@@ -12,8 +12,9 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(a => a.Id)
-            .ValueGeneratedOnAdd();
+        builder.Property(u => u.Id)
+            .ValueGeneratedOnAdd()
+            .UseIdentityColumn();
 
         builder.Property(a => a.Guid)
             .ValueGeneratedOnAdd()

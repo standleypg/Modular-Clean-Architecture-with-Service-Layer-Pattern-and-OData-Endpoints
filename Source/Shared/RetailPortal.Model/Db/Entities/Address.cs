@@ -12,7 +12,7 @@ public sealed class Address : EntityBase
 
     public string FullAddress => $"{this.Street}, {this.City}, {this.State}, {this.PostalCode}, {this.Country}";
 
-    public ulong UserId { get; set; }
+    public long UserId { get; set; }
     public User User { get; private set; } = default!;
 
     private Address(string street, string city, string state, string postalCode, string country)

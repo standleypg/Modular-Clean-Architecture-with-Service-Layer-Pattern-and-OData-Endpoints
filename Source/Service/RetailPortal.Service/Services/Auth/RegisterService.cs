@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using RetailPortal.DataFacade.Auth;
 using RetailPortal.DataFacade.Data.UnitOfWork;
 using RetailPortal.Model.Constants;
@@ -6,15 +7,12 @@ using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 using RetailPortal.Model.DTOs.Auth;
 using RetailPortal.Model.DTOs.Common;
-using RetailPortal.ServiceFacade;
 using RetailPortal.ServiceFacade.Auth;
-using RetailPortal.ServiceFacade.Role;
 
 namespace RetailPortal.Service.Services.Auth;
 
 public class RegisterService(
     IUnitOfWork uow,
-    IRoleService roleService,
     IJwtTokenGenerator jwtTokenGenerator,
     IPasswordHasher passwordHasher,
     IValidator<RegisterRequest> validator) : IRegisterService
@@ -32,7 +30,7 @@ public class RegisterService(
         var password = Password.Create(passwordHash, passwordSalt);
         var user = User.Create(command.FirstName, command.LastName, command.Email, password);
 
-        var role = await roleService.GetRoleByNameAsync(Roles.User);
+        var role = await uow.Roles.GetAll().FirstAsync(x => x.Name == nameof(Roles.User), cancellationToken);
         user.AddRole(role);
 
         uow.Users.Add(user);

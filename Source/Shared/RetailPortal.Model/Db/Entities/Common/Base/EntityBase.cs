@@ -2,8 +2,8 @@
 
 public class EntityBase
 {
-    public ulong Id { get; private set; }
-    public Guid Guid { get; set; }
+    public long Id { get; private set; }
+    public Guid Guid { get; set; } = Guid.NewGuid();
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 

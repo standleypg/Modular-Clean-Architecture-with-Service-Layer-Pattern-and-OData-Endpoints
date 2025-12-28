@@ -5,7 +5,7 @@ using RetailPortal.Model.DTOs.Common;
 namespace RetailPortal.Model.DTOs.Auth;
 
 public record AuthResponse(
-    ulong Id,
+    long Id,
     string FirstName,
     string LastName,
     string Email,
@@ -18,15 +18,8 @@ public static class AuthResponseExtensions
     {
         public static Result<AuthResponse, string> Create(User user, string token)
         {
-            try
-            {
-                var authResponse = user.Adapt<AuthResponse>() with { Token = token };
-                return Result<AuthResponse, string>.Success(authResponse);
-            }
-            catch (Exception ex)
-            {
-                return Result<AuthResponse, string>.Failure(ex.Message);
-            }
+            var authResponse = user.Adapt<AuthResponse>() with { Token = token };
+            return Result<AuthResponse, string>.Success(authResponse);
         }
     }
 }

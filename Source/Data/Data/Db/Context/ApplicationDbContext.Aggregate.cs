@@ -20,6 +20,10 @@ public partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext>
             .Include(p => this.Users)
     );
 
+    internal AggregateRepository<Role> Roles => new(
+        this.Set<Role>()
+    );
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

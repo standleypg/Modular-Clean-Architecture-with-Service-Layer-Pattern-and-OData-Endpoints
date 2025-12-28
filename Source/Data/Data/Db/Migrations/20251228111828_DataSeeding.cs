@@ -6,18 +6,19 @@ using RetailPortal.Data.Db.Sql;
 namespace RetailPortal.Data.Db.Migrations
 {
     /// <inheritdoc />
-    public partial class Reseed_Data : Migration
+    public partial class DataSeeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(SqlHelper.GetSqlFromFile("Common", "Seed", "v0.0"));
             migrationBuilder.Sql(SqlHelper.GetSqlFromFile("Common", "Seed", "v1.0"));
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // No down migration
+
         }
     }
 }

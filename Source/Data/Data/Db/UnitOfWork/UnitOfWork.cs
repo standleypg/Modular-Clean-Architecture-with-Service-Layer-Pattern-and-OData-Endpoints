@@ -16,10 +16,15 @@ public sealed class UnitOfWork(ApplicationDbContext context)
     private IDbContextTransaction? _currentTransaction;
     public IAggregateRepository<User> Users => context.Users;
     public IAggregateRepository<Product> Products { get; } = context.Products;
-
+    public IAggregateRepository<Role> Roles { get; } = context.Roles;
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public void Attach<TEntity>(TEntity entity) where TEntity : class
+    {
+        context.Attach(entity);
     }
 
     public async Task BeginTransactionAsync()

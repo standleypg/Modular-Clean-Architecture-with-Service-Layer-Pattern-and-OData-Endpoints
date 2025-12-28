@@ -7,6 +7,7 @@ public interface IUnitOfWork : IDisposable
 {
     IAggregateRepository<User> Users { get; }
     IAggregateRepository<Product> Products { get; }
+    IAggregateRepository<Role> Roles { get; }
     /// <summary>
     /// Saves all changes to the database in a single transaction.
     /// </summary>
@@ -26,4 +27,10 @@ public interface IUnitOfWork : IDisposable
     /// Rolls back the current transaction, discarding all changes.
     /// </summary>
     Task RollbackTransactionAsync();
+
+    /// <summary>
+    /// Attaches an entity to the context in the Unchanged state,
+    /// indicating it already exists in the database.
+    /// </summary>
+    void Attach<TEntity>(TEntity entity) where TEntity : class;
 }

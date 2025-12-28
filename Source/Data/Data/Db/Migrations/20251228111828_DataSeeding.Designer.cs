@@ -9,10 +9,10 @@ using RetailPortal.Data.Db.Context;
 
 #nullable disable
 
-namespace RetailPortal.Db.Data.Migrations
+namespace RetailPortal.Data.Db.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241210102435_DataSeeding")]
+    [Migration("20251228111828_DataSeeding")]
     partial class DataSeeding
     {
         /// <inheritdoc />
@@ -25,11 +25,13 @@ namespace RetailPortal.Db.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Address", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.Address", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -43,6 +45,10 @@ namespace RetailPortal.Db.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
@@ -62,46 +68,26 @@ namespace RetailPortal.Db.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Category", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.Product", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Product", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -110,6 +96,10 @@ namespace RetailPortal.Db.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(200)
@@ -123,26 +113,26 @@ namespace RetailPortal.Db.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SellerId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("SellerId");
-
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Role", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.Role", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -150,6 +140,10 @@ namespace RetailPortal.Db.Data.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -161,42 +155,16 @@ namespace RetailPortal.Db.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Seller", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("BusinessName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Sellers");
-                });
-
-            modelBuilder.Entity("RetailPortal.Domain.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -211,29 +179,34 @@ namespace RetailPortal.Db.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<Guid?>("SellerId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TokenProvider")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("UserRoles", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("AssignedDate")
                         .ValueGeneratedOnAdd()
@@ -247,34 +220,29 @@ namespace RetailPortal.Db.Data.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Address", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.Address", b =>
                 {
-                    b.HasOne("RetailPortal.Domain.Entities.User", "User")
+                    b.HasOne("RetailPortal.Model.Db.Entities.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Product", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.Product", b =>
                 {
-                    b.HasOne("RetailPortal.Domain.Entities.Category", "Category")
+                    b.HasOne("RetailPortal.Model.Db.Entities.User", "User")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RetailPortal.Domain.Entities.Seller", "Seller")
-                        .WithMany("Products")
-                        .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("RetailPortal.Domain.Entities.Common.ValueObjects.Price", "Price", b1 =>
+                    b.OwnsOne("RetailPortal.Model.Db.Entities.Common.ValueObjects.Price", "Price", b1 =>
                         {
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uuid");
+                            b1.Property<long>("ProductId")
+                                .HasColumnType("bigint");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
@@ -294,38 +262,24 @@ namespace RetailPortal.Db.Data.Migrations
                                 .HasForeignKey("ProductId");
                         });
 
-                    b.Navigation("Category");
-
                     b.Navigation("Price")
                         .IsRequired();
-
-                    b.Navigation("Seller");
-                });
-
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Seller", b =>
-                {
-                    b.HasOne("RetailPortal.Domain.Entities.User", "User")
-                        .WithOne("Seller")
-                        .HasForeignKey("RetailPortal.Domain.Entities.Seller", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.User", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.User", b =>
                 {
-                    b.OwnsOne("RetailPortal.Domain.Entities.Common.ValueObjects.Password", "Password", b1 =>
+                    b.OwnsOne("RetailPortal.Model.Db.Entities.Common.ValueObjects.Password", "Password", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
+                            b1.Property<long>("UserId")
+                                .HasColumnType("bigint");
 
                             b1.Property<byte[]>("PasswordHash")
-                                .IsRequired()
                                 .HasColumnType("bytea")
                                 .HasColumnName("PasswordHash");
 
                             b1.Property<byte[]>("PasswordSalt")
-                                .IsRequired()
                                 .HasColumnType("bytea")
                                 .HasColumnName("PasswordSalt");
 
@@ -337,40 +291,29 @@ namespace RetailPortal.Db.Data.Migrations
                                 .HasForeignKey("UserId");
                         });
 
-                    b.Navigation("Password")
-                        .IsRequired();
+                    b.Navigation("Password");
                 });
 
             modelBuilder.Entity("UserRoles", b =>
                 {
-                    b.HasOne("RetailPortal.Domain.Entities.Role", null)
+                    b.HasOne("RetailPortal.Model.Db.Entities.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RetailPortal.Domain.Entities.User", null)
+                    b.HasOne("RetailPortal.Model.Db.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Category", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("RetailPortal.Domain.Entities.Seller", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("RetailPortal.Domain.Entities.User", b =>
+            modelBuilder.Entity("RetailPortal.Model.Db.Entities.User", b =>
                 {
                     b.Navigation("Addresses");
 
-                    b.Navigation("Seller");
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }
