@@ -29,3 +29,19 @@ public class Result<T, TError>
 
     public static Result<T, TError> Failure(TError error) => new(default, error);
 }
+
+public static class ResultExtensions
+{
+    /// <summary>
+    /// Matches on the Result and executes the appropriate function based on success or failure.
+    /// </summary>
+    public static TResult Match<T, TError, TResult>(
+        this Result<T, TError> result,
+        Func<T, TResult> onSuccess,
+        Func<TError, TResult> onFailure)
+    {
+        return result.IsSuccess
+            ? onSuccess(result.Value)
+            : onFailure(result.Error);
+    }
+}

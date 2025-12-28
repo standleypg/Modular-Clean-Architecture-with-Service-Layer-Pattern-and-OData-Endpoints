@@ -20,10 +20,5 @@ public class AuthMappingConfig: IRegister
             .Map(dest => dest.LastName, src => src.LastName)
             .Map(dest => dest.Email, src => src.Email)
             .Map(dest => dest.Token, src => MapContext.Current == null ? string.Empty : MapContext.Current.Parameters["Token"]);
-
-        config.NewConfig<ClaimsPrincipal, TokenExchangeRequest>()
-            .Map(dest => dest.Email, src => src.FindFirst(CustomClaimTypes.Email) != null ? src.FindFirst(CustomClaimTypes.Email)!.Value : src.FindFirst(ClaimTypes.Email)!.Value)
-            .Map(dest => dest.Name, src => src.FindFirst(CustomClaimTypes.Name)!.Value)
-            .Map(dest => dest.TokenProvider, src => src.FindFirst(CustomClaimTypes.Iss)!.Value);
     }
 }

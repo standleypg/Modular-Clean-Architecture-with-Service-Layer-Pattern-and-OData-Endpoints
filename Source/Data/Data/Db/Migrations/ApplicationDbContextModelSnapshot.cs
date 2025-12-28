@@ -8,7 +8,7 @@ using RetailPortal.Data.Db.Context;
 
 #nullable disable
 
-namespace RetailPortal.Db.Data.Migrations
+namespace RetailPortal.Data.Db.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -24,9 +24,11 @@ namespace RetailPortal.Db.Data.Migrations
 
             modelBuilder.Entity("RetailPortal.Model.Db.Entities.Address", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -63,8 +65,8 @@ namespace RetailPortal.Db.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -75,9 +77,11 @@ namespace RetailPortal.Db.Data.Migrations
 
             modelBuilder.Entity("RetailPortal.Model.Db.Entities.Product", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<int>("Category")
                         .HasColumnType("integer");
@@ -109,8 +113,8 @@ namespace RetailPortal.Db.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -121,9 +125,11 @@ namespace RetailPortal.Db.Data.Migrations
 
             modelBuilder.Entity("RetailPortal.Model.Db.Entities.Role", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -151,9 +157,11 @@ namespace RetailPortal.Db.Data.Migrations
 
             modelBuilder.Entity("RetailPortal.Model.Db.Entities.User", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -191,11 +199,11 @@ namespace RetailPortal.Db.Data.Migrations
 
             modelBuilder.Entity("UserRoles", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<decimal>("RoleId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("AssignedDate")
                         .ValueGeneratedOnAdd()
@@ -230,8 +238,8 @@ namespace RetailPortal.Db.Data.Migrations
 
                     b.OwnsOne("RetailPortal.Model.Db.Entities.Common.ValueObjects.Price", "Price", b1 =>
                         {
-                            b1.Property<decimal>("ProductId")
-                                .HasColumnType("numeric(20,0)");
+                            b1.Property<long>("ProductId")
+                                .HasColumnType("bigint");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
@@ -261,8 +269,8 @@ namespace RetailPortal.Db.Data.Migrations
                 {
                     b.OwnsOne("RetailPortal.Model.Db.Entities.Common.ValueObjects.Password", "Password", b1 =>
                         {
-                            b1.Property<decimal>("UserId")
-                                .HasColumnType("numeric(20,0)");
+                            b1.Property<long>("UserId")
+                                .HasColumnType("bigint");
 
                             b1.Property<byte[]>("PasswordHash")
                                 .HasColumnType("bytea")

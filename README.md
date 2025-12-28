@@ -12,7 +12,7 @@ This repository provides a comprehensive template for implementing a Modular Cle
 - Migrated from CQRS pattern to Service Layer pattern
 - Removed MediatR and ErrorOr dependencies
 - Restructured to Facade-based architecture with clear separation of contracts and implementations
-- Migrated database primary keys from Guid to ulong for improved performance
+- Migrated database primary keys from Guid to long for improved performance
 - Removed Categories and Sellers tables, simplified schema
 - Split projects into ServiceFacade/Service and DataFacade/Data layers
 
@@ -33,8 +33,9 @@ See commit history for detailed migration information.
 
 ```bash
 cd Docker
-docker compose -p docker up -d postgres
+docker compose -p docker up -d postgres 
 ```
+or execute the compose form `docker-compose.yml` directly
 
 ### Running with .NET Aspire
 
@@ -42,7 +43,7 @@ Follow the .NET Aspire documentation for setup and configuration. Aspire provide
 
 ### Database Migrations
 
-After setting up the database, run migrations:
+After setting up the database, migrations is automatically applied when running the API. To manually apply migrations, use the following command:
 
 ```bash
 dotnet ef database update --project Source/Data/Data
@@ -170,9 +171,9 @@ Replace namespace placeholders throughout the solution:
 
 ## Database Design
 
-### Primary Key Strategy: ulong (numeric(20,0))
+### Primary Key Strategy: long (numeric(20,0))
 
-**Why ulong instead of Guid?**
+**Why long instead of Guid?**
 - **Performance**: Sequential numeric keys provide better index performance
 - **Storage**: Smaller storage footprint (8 bytes vs 16 bytes for Guid)
 - **Indexing**: B-tree indexes work more efficiently with sequential integers
@@ -281,13 +282,13 @@ OData is configured per-controller, allowing fine-grained control over queryable
 - ✅ Service Layer pattern implementation
 - ✅ Facade pattern for interface segregation
 - ✅ Repository pattern with AggregateRepository and ReadOnlyRepository
-- ✅ Database migration from Guid to ulong
+- ✅ Database migration from Guid to long
 - ✅ OData integration
 - ✅ FluentValidation integration
 - ✅ Mapster Integration
+- ✅ Result Pattern
 
 ### In Progress / TODO
-- [ ] **Result Pattern** - Replace exception-based error handling
 - [ ] **ApiConfiguration** - Centralized dependency injection setup
 - [ ] **Comprehensive Testing** - Expand unit and integration test coverage
 - [ ] **Caching Strategy** - Implement distributed caching
@@ -310,7 +311,7 @@ OData is configured per-controller, allowing fine-grained control over queryable
 ## Performance Considerations
 
 ### Database Optimization
-- Use sequential ulong primary keys for better indexing
+- Use sequential long primary keys for better indexing
 - Implement read/write database separation if needed
 - Use AsNoTracking() for read-only queries (via ReadOnlyRepository)
 - Leverage eager loading with Include() (via AggregateRepository)

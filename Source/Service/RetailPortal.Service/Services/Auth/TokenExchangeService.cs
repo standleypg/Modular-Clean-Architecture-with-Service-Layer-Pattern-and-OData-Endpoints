@@ -24,16 +24,18 @@ public class TokenExchangeService(
 
         var name = request.Name.AsSpan();
         var firstName = name[..name.IndexOf(' ')].ToString();
-        var lastName = name[name.IndexOf(' ')..].ToString();
+        var lastName = name[(name.IndexOf(' ') + 1)..].ToString();
         var email = request.Email;
 
         if (uow.Users.GetAll().FirstOrDefault(u => u.Email == email) is not { } user)
         {
             var role = await roleService.GetRoleByNameAsync(Roles.User);
-            var provider = request.TokenProvider == nameof(TokenProvider.Google)
+            var provider = request.TokenProvider.Contains(nameof(TokenProvider.Google), StringComparison.OrdinalIgnoreCase)
                 ? TokenProvider.Google
                 : TokenProvider.Azure;
             user = User.Create(firstName, lastName, email, provider);
+
+            uow.Attach(role);
             user.AddRole(role);
 
             uow.Users.Add(user);

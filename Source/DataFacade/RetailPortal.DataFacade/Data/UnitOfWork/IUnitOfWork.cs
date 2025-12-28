@@ -26,4 +26,10 @@ public interface IUnitOfWork : IDisposable
     /// Rolls back the current transaction, discarding all changes.
     /// </summary>
     Task RollbackTransactionAsync();
+
+    /// <summary>
+    /// Attaches an entity to the context in the Unchanged state,
+    /// indicating it already exists in the database.
+    /// </summary>
+    void Attach<TEntity>(TEntity entity) where TEntity : class;
 }

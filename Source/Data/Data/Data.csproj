@@ -2,7 +2,6 @@
 
     <ItemGroup>
       <EmbeddedResource Include="Db\Sql\Common\Seed\Seed_v0.0.sql" />
-      <EmbeddedResource Include="Db\Sql\Common\Seed\Seed_v0.1.sql" />
       <EmbeddedResource Include="Db\Sql\Common\Seed\Seed_v1.0.sql" />
     </ItemGroup>
 
@@ -30,6 +29,10 @@
     <ItemGroup>
       <ProjectReference Include="..\..\DataFacade\RetailPortal.DataFacade\RetailPortal.DataFacade.csproj" />
       <ProjectReference Include="..\..\Shared\RetailPortal.Shared\RetailPortal.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Db\Migrations\" />
     </ItemGroup>
 
 </Project>

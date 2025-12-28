@@ -4,7 +4,7 @@ DO
 $$
 DECLARE
     currencies      TEXT[] := ARRAY ['USD', 'SGD', 'MYR'];
-    user_ids        NUMERIC(20,0)[];
+    user_ids        BIGINT[];
     i               BIGINT;
     random_text     TEXT;
     category_val    INT;

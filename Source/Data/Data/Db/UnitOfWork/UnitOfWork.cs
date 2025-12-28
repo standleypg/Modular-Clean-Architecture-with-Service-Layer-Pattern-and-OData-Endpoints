@@ -22,6 +22,11 @@ public sealed class UnitOfWork(ApplicationDbContext context)
         return await context.SaveChangesAsync(cancellationToken);
     }
 
+    public void Attach<TEntity>(TEntity entity) where TEntity : class
+    {
+        context.Attach(entity);
+    }
+
     public async Task BeginTransactionAsync()
     {
         if (this._currentTransaction != null)

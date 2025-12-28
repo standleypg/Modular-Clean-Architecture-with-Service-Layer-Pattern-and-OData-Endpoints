@@ -12,7 +12,7 @@ public sealed class Product: EntityBase
     public int Quantity { get; private set;}
     public string? ImageUrl { get; private set;}
     public ProductCategory Category { get; private set; } = ProductCategory.None;
-    public ulong UserId { get; set; }
+    public long UserId { get; set; }
     public User User { get; private set;} = default!;
 
     // Empty constructor for EF Core required when we have Value Objects in the entity

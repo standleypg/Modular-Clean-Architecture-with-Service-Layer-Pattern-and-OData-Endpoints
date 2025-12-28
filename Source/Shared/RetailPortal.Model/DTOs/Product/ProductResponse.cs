@@ -4,14 +4,14 @@ namespace RetailPortal.Model.DTOs.Product;
 
 public record ProductResponse
 (
-    ulong ProductId,
+    long ProductId,
     string Name,
     string Description,
     Price Price,
     int Quantity,
     string? ImageUrl,
     ProductCategory Category,
-    ulong? UserId
+    long? UserId
 );
 
 public record Price(decimal Value, string Currency);

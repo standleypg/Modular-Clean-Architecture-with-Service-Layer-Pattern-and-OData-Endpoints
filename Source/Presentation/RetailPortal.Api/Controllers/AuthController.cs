@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using RetailPortal.Model.Constants;
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade.Auth;
+using System.Security.Claims;
 
 namespace RetailPortal.Api.Controllers;
 
@@ -30,12 +32,13 @@ public class AuthController(IRegisterService registerService, ILoginService logi
     {
         var result = await loginService.Login(request.Adapt<LoginRequest>());
 
-        if (result.IsSuccess)
-        {
-            return this.Ok(result.Value);
-        }
-
-        return this.Problem(statusCode: StatusCodes.Status400BadRequest, detail: result.Error);
+        return result
+            .Match(
+                onSuccess: this.Ok,
+                onFailure: error => this.Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    detail: error)
+            );
     }
 
     [HttpGet("token-exchange")]
@@ -43,8 +46,21 @@ public class AuthController(IRegisterService registerService, ILoginService logi
     [Authorize(AuthenticationSchemes = Appsettings.AzureAdSettings.JwtBearerScheme)]
     public async Task<IActionResult> TokenExchange()
     {
-        var result = await tokenExchangeService.ExchangeToken(this.User.Adapt<TokenExchangeRequest>());
+        var tokenExchangeRequest = new TokenExchangeRequest
+        (
+            this.User.GetClaimValue(CustomClaimTypes.Email, ClaimTypes.Email),
+            this.User.GetClaimValue(CustomClaimTypes.Name),
+            this.User.GetClaimValue(CustomClaimTypes.Iss)
+        );
+        var result = await tokenExchangeService.ExchangeToken(tokenExchangeRequest);
+        var t = this.Ok();
 
-        return this.Ok(result.Adapt<AuthResponse>());
+        return result
+            .Match(
+                onSuccess: this.Ok,
+                onFailure: error => this.Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    detail: error)
+            );
     }
 }

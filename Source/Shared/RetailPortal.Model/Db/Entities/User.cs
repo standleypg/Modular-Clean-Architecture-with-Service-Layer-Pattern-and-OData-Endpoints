@@ -42,7 +42,10 @@ public sealed class User : EntityBase
 
     public void AddRole(Role role)
     {
-        this.Roles.Add(role);
+        if (this.Roles.All(r => r.Id != role.Id))
+        {
+            this.Roles.Add(role);
+        }
     }
 
     public void AddAddress(Address address)
