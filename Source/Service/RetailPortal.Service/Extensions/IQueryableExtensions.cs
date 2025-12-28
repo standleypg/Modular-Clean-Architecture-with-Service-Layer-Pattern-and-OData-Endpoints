@@ -1,5 +1,5 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.EntityFrameworkCore;
 using RetailPortal.Model.DTOs.Common;
 using System.Globalization;
 using System.Web;
@@ -8,90 +8,71 @@ namespace RetailPortal.Service.Extensions;
 
 public static class QueryableExtensions
 {
-    private const int DefaultPageSize = 5;
-
-    public static async Task<ODataResponse<T>> GetODataResponseAsync<T>(this IQueryable<T> queryable,  ODataQueryOptions<T>? options, CancellationToken cancellationToken = default)
+    private static readonly ODataQuerySettings _defaultQuerySettings = new()
     {
-        if(IsInValidOptions(options))
+        EnsureStableOrdering = false
+    };
+
+    public static Task<ODataResponse<T>> GetODataResponseAsync<T>(this IQueryable<T> queryable,
+        HttpRequest request)
+    {
+        var options = request.GetODataQueryOptions<T>();
+
+        var appliedQuery = GetAppliedQuery(queryable, options);
+        var value = appliedQuery.Cast<T>().ToList();
+        var countQuery = GetCountQuery(queryable, options);
+        int? count = countQuery?.Count();
+
+        return Task.FromResult(new ODataResponse<T>()
         {
-            // TODO: return correct odata response when error
-            return new ODataResponse<T>();
-        }
-
-        // Apply $filter (but not $skip, $top yet)
-        var data = ApplyODataQuery(queryable, options);
-
-        // Get total count based on filtered data (before applying pagination)
-        int? count = null;
-        if (options.Count.Value)
-        {
-            count = await data.CountAsync(cancellationToken);
-        }
-
-        // Determine next page URL if $top and $skip are provided
-        string? nextPage = null;
-        if (count > 0)
-        {
-            nextPage = GetNextPageUri(options, data);
-        }
-
-        // Apply $skip and $top after filtering
-        data = ApplyPaging(data, options);
-
-        return new ODataResponse<T>
-        {
-            Value = await data.ToListAsync(cancellationToken),
-            Count = count,
-            NextPage = nextPage
-        };
+            Value = value,
+            Count = count?.ToString(CultureInfo.InvariantCulture),
+            NextPage = GetNextPageUri(
+                options,
+                appliedQuery.Provider.CreateQuery(
+                    appliedQuery.Expression
+                        .RemoveODataSkipTop()
+                    ) as IQueryable<T>)
+        });
     }
 
-    private static IQueryable<T> ApplyODataQuery<T>(IQueryable<T> data, ODataQueryOptions<T> options)
-    {
-        if (options.Filter != null)
-        {
-            data = options.Filter.ApplyTo(data, new ODataQuerySettings()) as IQueryable<T> ?? data;
-        }
-
-        // Use OrderBy carefully as it can cost performance
-        // Why? Because it creates extra SQL query check if the sorting exists
-        if (options.OrderBy != null)
-        {
-            data = options.OrderBy.ApplyTo(data, new ODataQuerySettings()) as IQueryable<T> ?? data;
-        }
-
-        return data;
-    }
-
-    private static IQueryable<T> ApplyPaging<T>(
+    private static IQueryable GetAppliedQuery<T>(
         IQueryable<T> queryable,
-        ODataQueryOptions<T>? options)
+        ODataQueryOptions<T> options
+    )
     {
-
-        if (options?.Skip != null)
-        {
-            queryable = options.Skip.ApplyTo(queryable, new ODataQuerySettings()) ?? queryable;
-        }
-
-        if (options?.Top != null)
-        {
-            queryable = options.Top.ApplyTo(queryable, new ODataQuerySettings()) ?? queryable;
-        }
-
-        return queryable;
+        return options.ApplyTo(
+            queryable,
+            _defaultQuerySettings
+        );
     }
 
-    private static bool IsInValidOptions<T>(ODataQueryOptions<T> options)
+    private static IQueryable<T>? GetCountQuery<T>(
+        IQueryable<T> queryable,
+        ODataQueryOptions<T> queryOptions
+    )
     {
-        return options.SelectExpand != null || options.RawValues.Select != null;
+        IQueryable<T>? countQuery = null;
+        if (queryOptions.Count is { Value: true })
+        {
+            countQuery = queryOptions.ApplyTo(
+                queryable,
+                _defaultQuerySettings
+            ) as IQueryable<T>;
+        }
+
+        return countQuery;
     }
 
-    private static string? GetNextPageUri<T>(ODataQueryOptions<T> options, IQueryable<T> data)
+    private static string? GetNextPageUri<T>(ODataQueryOptions<T> options, IQueryable<T>? data)
     {
         var skip = options.Skip?.Value ?? 0;
-        var top = options.Top?.Value ?? DefaultPageSize;
+        var top = options.Top.Value;
 
-        if (!data.Skip(skip + top).Any()) return null;
+        if (data != null && !data.Skip(skip + top).Any())
+        {
+            return null;
+        }
 
         var query = HttpUtility.ParseQueryString(options.Request.QueryString.ToString());
         query.Set("$skip", string.Format(CultureInfo.InvariantCulture, "{0}", skip + top));

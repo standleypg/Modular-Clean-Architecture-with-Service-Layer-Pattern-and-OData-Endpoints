@@ -1,29 +1,31 @@
 using FluentValidation;
+using MapsterMapper;
 using RetailPortal.DataFacade.Auth;
 using RetailPortal.DataFacade.Data.Repositories;
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade.Auth;
 
 namespace RetailPortal.Service.Services.Auth;
 
-public class LoginService(IReadStore readStore, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator, IValidator<LoginRequest> validator): ILoginService
+public class LoginService(IReadStore readStore, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator, IValidator<LoginRequest> validator, IMapper mapper): ILoginService
 {
-    public async Task<AuthResult> Login(LoginRequest request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse, string>> Login(LoginRequest request, CancellationToken cancellationToken)
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
         if (readStore.User.GetAll().FirstOrDefault(u => u.Email == request.Email) is not { } user)
         {
-            throw new InvalidOperationException("Invalid credentials.");
+            return Result<AuthResponse, string>.Failure("Invalid credentials.");
         }
 
         if (!passwordHasher.VerifyPasswordHash(request.Password, user.Password!.PasswordHash, user.Password!.PasswordSalt))
         {
-            throw new InvalidOperationException("Invalid credentials."); // just an example of returning list of errors
+            return Result<AuthResponse, string>.Failure("Invalid credentials.");
         }
 
         var token = jwtTokenGenerator.GenerateToken(user);
 
-        return new AuthResult(user, token);
+        return AuthResponse.Create(user, token);
     }
 }

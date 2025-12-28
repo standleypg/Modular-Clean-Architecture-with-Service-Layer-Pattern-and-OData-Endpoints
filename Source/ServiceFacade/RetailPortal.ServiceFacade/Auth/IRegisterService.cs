@@ -1,8 +1,9 @@
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Model.DTOs.Common;
 
 namespace RetailPortal.ServiceFacade.Auth;
 
 public interface IRegisterService
 {
-    Task<AuthResult> Register(RegisterRequest command, CancellationToken cancellationToken = default);
+    Task<Result<AuthResponse, string>> Register(RegisterRequest command, CancellationToken cancellationToken = default);
 }

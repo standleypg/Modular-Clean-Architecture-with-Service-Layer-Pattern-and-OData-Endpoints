@@ -1,4 +1,4 @@
-using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.OData.Query;
 using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.DTOs.Common;
@@ -6,37 +6,24 @@ using RetailPortal.Model.DTOs.Product;
 
 namespace RetailPortal.Api.Common.Mapping;
 
-public class ProductMappingConfig : Profile
+public class ProductMappingConfig : IRegister
 {
-    public ProductMappingConfig()
+    public void Register(TypeAdapterConfig config)
     {
-        this.CreateMap<CreateProductRequest, CreateProductRequest>();
+        config.NewConfig<CreateProductRequest, CreateProductRequest>();
 
-           this.CreateMap<Product, ProductResponse>()
-               .ConstructUsing(product => new ProductResponse(product.Id, product.Name, product.Description, new Price(product.Price.Value, product.Price.Currency), product.Quantity, product.ImageUrl, product.Category, product.User.Id));
+        config.NewConfig<Product, ProductResponse>()
+            .Map(dest => dest.ProductId, src => src.Id)
+            .Map(dest => dest.Price, src => new Price(src.Price.Value, src.Price.Currency))
+            .Map(dest => dest.UserId, src => src.User.Id);
 
-           this.CreateMap<ODataQueryOptions<Product>, GetAllProductRequest>()
-               .ConstructUsing(options => new GetAllProductRequest(options));
+        config.NewConfig<Model.Db.Entities.Common.ValueObjects.Price, Price>()
+            .Map(dest => dest.Value, src => src.Value)
+            .Map(dest => dest.Currency, src => src.Currency);
 
-           this.CreateMap<Model.Db.Entities.Common.ValueObjects.Price, Price>()
-               .ConstructUsing(price => new Price(price.Value, price.Currency));
-
-           this.CreateMap<ODataResponse<Product>, ODataResponse<ProductResponse>>()
-               .ConstructUsing(products => new ODataResponse<ProductResponse>()
-               {
-                     Count = products.Count,
-                     NextPage = products.NextPage,
-                     Value = (products.Value ?? new List<Product>())
-                         .Select(product => new ProductResponse(
-                             product.Id,
-                             product.Name,
-                             product.Description,
-                             new Price(product.Price.Value, product.Price.Currency),
-                             product.Quantity,
-                             product.ImageUrl,
-                             product.Category,
-                             product.UserId
-                         )).ToList()
-               });
+        config.ForType(typeof(ODataResponse<>), typeof(ODataResponse<>))
+            .Map(nameof(ODataResponse<>.Count), nameof(ODataResponse<>.Count))
+            .Map(nameof(ODataResponse<>.NextPage), nameof(ODataResponse<>.NextPage))
+            .Map(nameof(ODataResponse<>.Value), nameof(ODataResponse<>.Value));
     }
 }

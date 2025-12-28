@@ -5,6 +5,7 @@ using RetailPortal.Model.Constants;
 using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.Db.Entities.Common;
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade;
 using RetailPortal.ServiceFacade.Auth;
 using RetailPortal.ServiceFacade.Role;
@@ -17,7 +18,7 @@ public class TokenExchangeService(
     IJwtTokenGenerator jwtTokenGenerator,
     IValidator<TokenExchangeRequest> validator) : ITokenExchangeService
 {
-    public async Task<AuthResult> ExchangeToken(TokenExchangeRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse, string>> ExchangeToken(TokenExchangeRequest request, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAndThrowAsync(request, cancellationToken);
 
@@ -29,7 +30,7 @@ public class TokenExchangeService(
         if (uow.Users.GetAll().FirstOrDefault(u => u.Email == email) is not { } user)
         {
             var role = await roleService.GetRoleByNameAsync(Roles.User);
-            var provider = request.TokenProvider == TokenProvider.Google.ToString()
+            var provider = request.TokenProvider == nameof(TokenProvider.Google)
                 ? TokenProvider.Google
                 : TokenProvider.Azure;
             user = User.Create(firstName, lastName, email, provider);
@@ -41,6 +42,6 @@ public class TokenExchangeService(
 
         var token = jwtTokenGenerator.GenerateToken(user);
 
-        return new AuthResult(user, token);
+        return AuthResponse.Create(user, token);
     }
 }

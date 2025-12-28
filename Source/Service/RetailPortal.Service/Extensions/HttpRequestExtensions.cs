@@ -1,11 +1,13 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Collections.Concurrent;
 
-namespace RetailPortal.Api.Common.Http;
+namespace RetailPortal.Service.Extensions;
 
 internal static class HttpRequestExtensions
 {
@@ -25,6 +27,13 @@ internal static class HttpRequestExtensions
         if (!queryCollection.ContainsKey("$count"))
         {
             var modifiedQuery = QueryHelpers.AddQueryString(request.QueryString.ToString(), "$count", "false");
+            request.QueryString = new QueryString(modifiedQuery);
+        }
+
+        // Include $top=1000 by default if not specified in the request
+        if (!queryCollection.ContainsKey("$top"))
+        {
+            var modifiedQuery = QueryHelpers.AddQueryString(request.QueryString.ToString(), "$top", "1000");
             request.QueryString = new QueryString(modifiedQuery);
         }
 

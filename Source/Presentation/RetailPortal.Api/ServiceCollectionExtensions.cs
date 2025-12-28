@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Mapster;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -12,13 +13,13 @@ public static class ServiceCollectionExtensions
         {
             services
                 .AddOpenApi()
-                .AddAutoMapper();
+                .AddMapping();
             return services;
         }
 
-        private void AddAutoMapper()
+        private void AddMapping()
         {
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddMapster();
         }
 
         private IServiceCollection AddOpenApi()
