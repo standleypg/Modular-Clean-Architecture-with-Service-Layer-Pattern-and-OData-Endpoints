@@ -2,6 +2,19 @@
   "version": 1,
   "dependencies": {
     "net9.0": {
+      "Mapster": {
+        "type": "Transitive",
+        "resolved": "7.4.0",
+        "contentHash": "RYGoDqvS4WTKIq0HDyPBBVIj6N0mluOCXQ1Vk95JKseMHEsbCXSEGKSlP95oL+s42IXAXbqvHj7p0YaRBUcfqg==",
+        "dependencies": {
+          "Mapster.Core": "1.2.1"
+        }
+      },
+      "Mapster.Core": {
+        "type": "Transitive",
+        "resolved": "1.2.1",
+        "contentHash": "11lokmfliBEMMmjeqxFGNpqGXq6tN96zFqpBmfYeahr4Ybk63oDmeJmOflsATjobYkX248g5Y62oQ2NNnZaeww=="
+      },
       "Microsoft.AspNetCore.OData": {
         "type": "Transitive",
         "resolved": "9.1.1",
@@ -87,6 +100,7 @@
       "retailportal.model": {
         "type": "Project",
         "dependencies": {
+          "Mapster": "[7.4.0, )",
           "Microsoft.AspNetCore.OData": "[9.1.1, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[9.0.0, )"
         }

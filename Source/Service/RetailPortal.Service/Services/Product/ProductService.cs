@@ -1,29 +1,20 @@
-using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.OData.Query;
+using Mapster;
 using RetailPortal.DataFacade.Data.Repositories;
 using RetailPortal.DataFacade.Data.UnitOfWork;
 using RetailPortal.Model.DTOs.Common;
 using RetailPortal.Model.DTOs.Product;
-using RetailPortal.Service.Extensions;
 using RetailPortal.ServiceFacade.Product;
 using Price = RetailPortal.Model.Db.Entities.Common.ValueObjects.Price;
 
 namespace RetailPortal.Service.Services.Product;
 
-public class ProductService(IUnitOfWork uow, IReadStore readStore, IMapper mapper): IProductService
+public class ProductService(IUnitOfWork uow, IReadStore readStore): IProductService
 {
-    public async Task<ODataResponse<Model.Db.Entities.Product>> GetAllProduct(GetAllProductRequest request, CancellationToken cancellationToken)
+    public Task<TResult> GetAllProduct<TResult>(Func<IQueryable<ProductResponse>, Task<TResult>> executeAsync)
     {
-        var options = request.options;
-
-        ArgumentNullException.ThrowIfNull(options);
-
         var products = readStore.Product.GetAll();
 
-        var oDataResponse = await products.GetODataResponseAsync(options, cancellationToken);
-
-        return mapper.Map<ODataResponse<Model.Db.Entities.Product>>(oDataResponse);
+        return executeAsync(products.ProjectToType<ProductResponse>());
     }
 
     public async Task<Model.Db.Entities.Product> CreateProduct(CreateProductRequest request, CancellationToken cancellationToken = default)

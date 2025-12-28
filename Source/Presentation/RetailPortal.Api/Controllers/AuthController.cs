@@ -1,5 +1,5 @@
 using Asp.Versioning;
-using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +13,13 @@ namespace RetailPortal.Api.Controllers;
 [ApiVersion("0.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/auth")]
-public class AuthController(IMapper mapper, IRegisterService registerService, ILoginService loginService, ITokenExchangeService tokenExchangeService) : ODataController
+public class AuthController(IRegisterService registerService, ILoginService loginService, ITokenExchangeService tokenExchangeService) : ODataController
 {
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var result = await registerService.Register(mapper.Map<RegisterRequest>(request));
+        var result = await registerService.Register(request.Adapt<RegisterRequest>());
 
         return this.Ok(result);
     }
@@ -28,9 +28,14 @@ public class AuthController(IMapper mapper, IRegisterService registerService, IL
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = await loginService.Login(mapper.Map<LoginRequest>(request));
+        var result = await loginService.Login(request.Adapt<LoginRequest>());
 
-        return this.Ok(mapper.Map<AuthResponse>(result));
+        if (result.IsSuccess)
+        {
+            return this.Ok(result.Value);
+        }
+
+        return this.Problem(statusCode: StatusCodes.Status400BadRequest, detail: result.Error);
     }
 
     [HttpGet("token-exchange")]
@@ -38,8 +43,8 @@ public class AuthController(IMapper mapper, IRegisterService registerService, IL
     [Authorize(AuthenticationSchemes = Appsettings.AzureAdSettings.JwtBearerScheme)]
     public async Task<IActionResult> TokenExchange()
     {
-        var result = await tokenExchangeService.ExchangeToken(mapper.Map<TokenExchangeRequest>(this.User));
+        var result = await tokenExchangeService.ExchangeToken(this.User.Adapt<TokenExchangeRequest>());
 
-        return this.Ok(mapper.Map<AuthResponse>(result));
+        return this.Ok(result.Adapt<AuthResponse>());
     }
 }

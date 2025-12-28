@@ -5,6 +5,7 @@ using RetailPortal.Model.Constants;
 using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade;
 using RetailPortal.ServiceFacade.Auth;
 using RetailPortal.ServiceFacade.Role;
@@ -18,16 +19,16 @@ public class RegisterService(
     IPasswordHasher passwordHasher,
     IValidator<RegisterRequest> validator) : IRegisterService
 {
-    public async Task<AuthResult> Register(RegisterRequest command, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse, string>> Register(RegisterRequest command, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAndThrowAsync(command, cancellationToken);
 
         if (uow.Users.GetAll().FirstOrDefault(u => u.Email == command.Email) is not null)
         {
-            throw new InvalidOperationException("The email is already in use");
+            return Result<AuthResponse, string>.Failure("Email is already in use.");
         }
 
-        passwordHasher.CreatePasswordHash(command.Password!, out var passwordHash, out var passwordSalt);
+        passwordHasher.CreatePasswordHash(command.Password, out var passwordHash, out var passwordSalt);
         var password = Password.Create(passwordHash, passwordSalt);
         var user = User.Create(command.FirstName, command.LastName, command.Email, password);
 
@@ -39,6 +40,6 @@ public class RegisterService(
 
         var token = jwtTokenGenerator.GenerateToken(user);
 
-        return new AuthResult(user, token);
+        return AuthResponse.Create(user, token);
     }
 }
