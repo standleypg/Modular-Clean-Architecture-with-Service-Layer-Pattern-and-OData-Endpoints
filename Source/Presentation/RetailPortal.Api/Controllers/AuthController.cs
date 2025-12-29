@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using RetailPortal.Api.Controllers.Common;
 using RetailPortal.Model.Constants;
 using RetailPortal.Model.DTOs.Auth;
-using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade.Auth;
 using System.Security.Claims;
 
@@ -19,32 +19,26 @@ public class AuthController(IRegisterService registerService, ILoginService logi
 {
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult> Register([FromBody] RegisterRequest request)
     {
         var result = await registerService.Register(request.Adapt<RegisterRequest>());
 
-        return this.Ok(result);
+        return result.Match(this);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult> Login([FromBody] LoginRequest request)
     {
         var result = await loginService.Login(request.Adapt<LoginRequest>());
 
-        return result
-            .Match(
-                onSuccess: this.Ok,
-                onFailure: error => this.Problem(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    detail: error)
-            );
+        return result.Match(this);
     }
 
     [HttpGet("token-exchange")]
     [Authorize(AuthenticationSchemes = GoogleDefaults.AuthenticationScheme)]
     [Authorize(AuthenticationSchemes = Appsettings.AzureAdSettings.JwtBearerScheme)]
-    public async Task<IActionResult> TokenExchange()
+    public async Task<ActionResult> TokenExchange()
     {
         var tokenExchangeRequest = new TokenExchangeRequest
         (
@@ -55,12 +49,6 @@ public class AuthController(IRegisterService registerService, ILoginService logi
         var result = await tokenExchangeService.ExchangeToken(tokenExchangeRequest);
         var t = this.Ok();
 
-        return result
-            .Match(
-                onSuccess: this.Ok,
-                onFailure: error => this.Problem(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    detail: error)
-            );
+        return result.Match(this);
     }
 }

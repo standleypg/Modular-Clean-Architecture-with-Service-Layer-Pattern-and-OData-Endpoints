@@ -15,10 +15,6 @@ public class AuthMappingConfig: IRegister
         config.NewConfig<LoginRequest, LoginRequest>();
 
         config.NewConfig<User, AuthResponse>()
-            .Map(dest => dest.Id, src => src.Id)
-            .Map(dest => dest.FirstName, src => src.FirstName)
-            .Map(dest => dest.LastName, src => src.LastName)
-            .Map(dest => dest.Email, src => src.Email)
             .Map(dest => dest.Token, src => MapContext.Current == null ? string.Empty : MapContext.Current.Parameters["Token"]);
     }
 }

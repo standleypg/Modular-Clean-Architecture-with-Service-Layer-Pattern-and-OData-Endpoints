@@ -13,9 +13,7 @@ public class ProductMappingConfig : IRegister
         config.NewConfig<CreateProductRequest, CreateProductRequest>();
 
         config.NewConfig<Product, ProductResponse>()
-            .Map(dest => dest.ProductId, src => src.Id)
-            .Map(dest => dest.Price, src => new Price(src.Price.Value, src.Price.Currency))
-            .Map(dest => dest.UserId, src => src.User.Id);
+            .Map(dest => dest.ProductId, src => src.Id);
 
         config.NewConfig<Model.Db.Entities.Common.ValueObjects.Price, Price>()
             .Map(dest => dest.Value, src => src.Value)
