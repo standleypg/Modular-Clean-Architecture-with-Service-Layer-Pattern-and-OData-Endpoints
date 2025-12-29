@@ -6,9 +6,9 @@ using RetailPortal.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
-
 var configuration = builder.Configuration;
+
+builder.AddServiceDefaults(configuration);
 
 builder.Services
     .AddServiceCollections()

@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RetailPortal.DataFacade.Auth;
 using RetailPortal.DataFacade.Data.UnitOfWork;
@@ -8,6 +7,7 @@ using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 using RetailPortal.Model.DTOs.Auth;
 using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade.Auth;
+using RetailPortal.ServiceFacade.Validator.Common;
 
 namespace RetailPortal.Service.Services.Auth;
 
@@ -15,11 +15,14 @@ public class RegisterService(
     IUnitOfWork uow,
     IJwtTokenGenerator jwtTokenGenerator,
     IPasswordHasher passwordHasher,
-    IValidator<RegisterRequest> validator) : IRegisterService
+    IValidator validator) : IRegisterService
 {
     public async Task<Result<AuthResponse, string>> Register(RegisterRequest command, CancellationToken cancellationToken = default)
     {
-        await validator.ValidateAndThrowAsync(command, cancellationToken);
+        if(await validator.ValidateAndExecuteAsync(command, cancellationToken) is { IsSuccess: false} validationError)
+        {
+            return validationError.ConvertFailure<RegisterRequest, AuthResponse>();
+        }
 
         if (uow.Users.GetAll().FirstOrDefault(u => u.Email == command.Email) is not null)
         {

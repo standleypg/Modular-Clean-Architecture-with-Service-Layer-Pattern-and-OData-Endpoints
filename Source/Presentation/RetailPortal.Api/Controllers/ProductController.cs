@@ -3,9 +3,8 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using RetailPortal.Api.Common.Http;
+using RetailPortal.Api.Controllers.Common;
 using RetailPortal.Model.Db.Entities;
-using RetailPortal.Model.DTOs.Common;
 using RetailPortal.Model.DTOs.Product;
 using RetailPortal.Service.Extensions;
 using RetailPortal.ServiceFacade.Product;
@@ -31,8 +30,8 @@ public class ProductController(IProductService productService) : ODataController
     [HttpGet]
     public async Task<ActionResult> GetAllProducts()
     {
-        var result = await productService.GetAllProduct(queryable => queryable.GetODataResponseAsync(this.Request));
+        var result = await productService.GetAllProduct(queryable => queryable.GetODataResponseAsync<Product, ProductResponse>(this.Request));
 
-        return this.Ok(result);
+        return result.Match(this);
     }
 }

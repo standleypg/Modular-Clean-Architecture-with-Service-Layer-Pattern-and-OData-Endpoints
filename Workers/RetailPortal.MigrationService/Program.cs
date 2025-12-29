@@ -5,7 +5,9 @@ using RetailPortal.Model.Constants;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.AddServiceDefaults();
+var configuration = builder.Configuration;
+
+builder.AddServiceDefaults(configuration);
 
 builder.Services.AddHostedService<Worker>();
 

@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Query;
 using RetailPortal.Model.DTOs.Common;
@@ -13,17 +14,17 @@ public static class QueryableExtensions
         EnsureStableOrdering = false
     };
 
-    public static Task<ODataResponse<T>> GetODataResponseAsync<T>(this IQueryable<T> queryable,
+    public static Task<ODataResponse<TDestination>> GetODataResponseAsync<TEntity, TDestination>(this IQueryable<TEntity> queryable,
         HttpRequest request)
     {
-        var options = request.GetODataQueryOptions<T>();
+        var options = request.GetODataQueryOptions<TEntity>();
 
         var appliedQuery = GetAppliedQuery(queryable, options);
-        var value = appliedQuery.Cast<T>().ToList();
+        var value = appliedQuery.ProjectToType<TDestination>();
         var countQuery = GetCountQuery(queryable, options);
         int? count = countQuery?.Count();
 
-        return Task.FromResult(new ODataResponse<T>()
+        return Task.FromResult(new ODataResponse<TDestination>()
         {
             Value = value,
             Count = count?.ToString(CultureInfo.InvariantCulture),
@@ -32,7 +33,7 @@ public static class QueryableExtensions
                 appliedQuery.Provider.CreateQuery(
                     appliedQuery.Expression
                         .RemoveODataSkipTop()
-                    ) as IQueryable<T>)
+                    ) as IQueryable<TEntity>)
         });
     }
 

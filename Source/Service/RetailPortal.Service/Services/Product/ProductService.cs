@@ -10,11 +10,11 @@ namespace RetailPortal.Service.Services.Product;
 
 public class ProductService(IUnitOfWork uow, IReadStore readStore): IProductService
 {
-    public Task<TResult> GetAllProduct<TResult>(Func<IQueryable<ProductResponse>, Task<TResult>> executeAsync)
+    public Task<Result<TResult, string>> GetAllProduct<TResult>(Func<IQueryable<Model.Db.Entities.Product>, Task<TResult>> executeAsync)
     {
         var products = readStore.Product.GetAll();
 
-        return executeAsync(products.ProjectToType<ProductResponse>());
+        return Result<TResult, string>.CreateAsync(() => executeAsync(products));
     }
 
     public async Task<Model.Db.Entities.Product> CreateProduct(CreateProductRequest request, CancellationToken cancellationToken = default)
