@@ -7,18 +7,31 @@ using System.Web;
 
 namespace RetailPortal.Service.Extensions;
 
-public static class QueryableExtensions
+public static partial class ODataQueryExtension
 {
-    private static readonly ODataQuerySettings _defaultQuerySettings = new()
-    {
-        EnsureStableOrdering = false
-    };
+    private static readonly ODataQuerySettings _defaultQuerySettings = new() {  };
 
-    public static Task<ODataResponse<TDestination>> GetODataResponseAsync<TEntity, TDestination>(this IQueryable<TEntity> queryable,
+    public static Task<ODataResponse<TDestination>> GetODataResponse<TEntity, TDestination>(
+        this IQueryable<TEntity> queryable,
         HttpRequest request)
     {
         var options = request.GetODataQueryOptions<TEntity>();
 
+        var cursor = request.Query["cursor"].FirstOrDefault();
+        var useCursorPagination = !string.IsNullOrEmpty(cursor) || (!request.Query.ContainsKey("$skip") && request.Query.ContainsKey("$top"));
+
+        if(useCursorPagination)
+        {
+            return GetCursorBasedResponse<TEntity, TDestination>(queryable, request, options, cursor);
+        }
+
+        return GetOffsetBasedResponse<TEntity, TDestination>(queryable, options);
+    }
+
+    private static Task<ODataResponse<TDestination>> GetOffsetBasedResponse<TEntity, TDestination>(
+        IQueryable<TEntity> queryable,
+        ODataQueryOptions<TEntity> options)
+    {
         var appliedQuery = GetAppliedQuery(queryable, options);
         var value = appliedQuery.ProjectToType<TDestination>();
         var countQuery = GetCountQuery(queryable, options);
@@ -28,12 +41,7 @@ public static class QueryableExtensions
         {
             Value = value,
             Count = count?.ToString(CultureInfo.InvariantCulture),
-            NextPage = GetNextPageUri(
-                options,
-                appliedQuery.Provider.CreateQuery(
-                    appliedQuery.Expression
-                        .RemoveODataSkipTop()
-                    ) as IQueryable<TEntity>)
+            NextPage = GetNextPageUri(options, count)
         });
     }
 
@@ -58,19 +66,20 @@ public static class QueryableExtensions
         {
             countQuery = queryOptions.ApplyTo(
                 queryable,
-                _defaultQuerySettings
+                _defaultQuerySettings,
+                AllowedQueryOptions.Skip | AllowedQueryOptions.Top
             ) as IQueryable<T>;
         }
 
         return countQuery;
     }
 
-    private static string? GetNextPageUri<T>(ODataQueryOptions<T> options, IQueryable<T>? data)
+    private static string? GetNextPageUri<T>(ODataQueryOptions<T> options, int? count)
     {
         var skip = options.Skip?.Value ?? 0;
         var top = options.Top.Value;
 
-        if (data != null && !data.Skip(skip + top).Any())
+        if (!count.HasValue || skip + top >= count)
         {
             return null;
         }
@@ -80,6 +89,6 @@ public static class QueryableExtensions
         query.Set("$top", string.Format(CultureInfo.InvariantCulture, "{0}", top));
 
         var rawNextPage = $"{options.Request.Scheme}://{options.Request.Host}{options.Request.Path}?{query}";
-        return new Uri(HttpUtility.UrlDecode(rawNextPage)).AbsoluteUri.ToString(CultureInfo.InvariantCulture);
+        return new Uri(HttpUtility.UrlDecode(rawNextPage)).AbsoluteUri;
     }
 }
