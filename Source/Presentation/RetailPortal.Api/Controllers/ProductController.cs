@@ -30,7 +30,7 @@ public class ProductController(IProductService productService) : ODataController
     [HttpGet]
     public async Task<ActionResult> GetAllProducts()
     {
-        var result = await productService.GetAllProduct(queryable => queryable.GetODataResponseAsync<Product, ProductResponse>(this.Request));
+        var result = await productService.GetAllProduct(queryable => queryable.GetODataResponse<Product, ProductResponse>(this.Request));
 
         return result.Match(this);
     }
