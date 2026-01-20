@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <RootNamespace>RetailPortal.Infrastructure.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,11 +22,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\DataFacade\RetailPortal.DataFacade\RetailPortal.DataFacade.csproj" />
+      <ProjectReference Include="..\..\Data\Data\Data.csproj" />
       <ProjectReference Include="..\..\Infrastructure\RetailPortal.Infrastructure\RetailPortal.Infrastructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Data\UnitOfWorks\" />
     </ItemGroup>
 
 </Project>

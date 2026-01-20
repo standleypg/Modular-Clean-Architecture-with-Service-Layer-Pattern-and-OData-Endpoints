@@ -8,8 +8,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RetailPortal.Data.Db.UnitOfWork;
 
-public sealed class UnitOfWork(ApplicationDbContext context)
-    : IUnitOfWork, IAsyncDisposable
+public class UnitOfWork(ApplicationDbContext context)
+    : IUnitOfWork
 {
     private bool _disposed;
 
@@ -98,15 +98,5 @@ public sealed class UnitOfWork(ApplicationDbContext context)
             context.Dispose();
         }
         this._disposed = true;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (this._currentTransaction != null)
-        {
-            await this._currentTransaction.DisposeAsync();
-        }
-
-        await context.DisposeAsync();
     }
 }

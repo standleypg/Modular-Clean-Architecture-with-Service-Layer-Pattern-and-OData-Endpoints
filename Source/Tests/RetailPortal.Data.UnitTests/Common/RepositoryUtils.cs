@@ -1,24 +1,25 @@
-using RetailPortal.Domain.Interfaces.Infrastructure.Data.Repositories;
-using RetailPortal.Domain.Interfaces.Infrastructure.Data.UnitOfWork;
-using RetailPortal.Infrastructure.Data.UnitOfWork;
+using RetailPortal.Data.Db.UnitOfWork;
+using RetailPortal.DataFacade.Data.Repositories;
+using RetailPortal.DataFacade.Data.UnitOfWork;
 using RetailPortal.Model.Db.Entities;
 using RetailPortal.Model.Db.Entities.Common.Base;
+using RetailPortal.Model.Db.Entities.Common.Enum;
 using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 
-namespace RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
+namespace RetailPortal.Infrastructure.UnitTests.Common;
 
-public class RepositoryUtils : BaseRepositoryTests
+public class RepositoryUtils : BaseRepositoryTests, IDisposable
 {
     private readonly UnitOfWork _uow;
 
     public RepositoryUtils()
     {
-        this._uow = new UnitOfWork(Context);
+        this._uow = new UnitOfWork(this.Context);
     }
 
     public async Task<IQueryable<TEntity>> CreateQueryableMockEntities<TEntity>(
         Func<int, TEntity> createEntity,
-        Func<IUnitOfWork, IGenericRepository<TEntity>> resolveRepository,
+        Func<IUnitOfWork, IAggregateRepository<TEntity>> resolveRepository,
         int count = 1,
         CancellationToken cancellationToken = default) where TEntity : EntityBase
     {
@@ -27,7 +28,7 @@ public class RepositoryUtils : BaseRepositoryTests
         for (int i = 0; i < count; i++)
         {
             var entity = createEntity(i);
-            await repository.AddAsync(entity, cancellationToken);
+            repository.Add(entity);
         }
 
         await this._uow.SaveChangesAsync(cancellationToken);
@@ -37,14 +38,14 @@ public class RepositoryUtils : BaseRepositoryTests
 
     public async Task<IQueryable<TEntity>> CreateQueryableMockEntities<TEntity>(
         List<TEntity> entities,
-        Func<IUnitOfWork, IGenericRepository<TEntity>> resolveRepository,
+        Func<IUnitOfWork, IAggregateRepository<TEntity>> resolveRepository,
         CancellationToken cancellationToken = default) where TEntity : EntityBase
     {
         var repository = resolveRepository(this._uow);
 
         foreach (var entity in entities)
         {
-            await repository.AddAsync(entity, cancellationToken);
+            repository.Add(entity);
         }
 
         await this._uow.SaveChangesAsync(cancellationToken);
@@ -68,15 +69,22 @@ public class RepositoryUtils : BaseRepositoryTests
     public static Product CreateProduct(int i)
     {
         var product = Product.Create($"Product {i}", $"Description {i}", Price.Create(i, "MYR"), i, null);
-        product.AddCategory(Guid.NewGuid());
-        product.AddSeller(Guid.NewGuid());
+        var values = Enum.GetValues<ProductCategory>();
+        var random = new Random();
+        var randomCategory = (ProductCategory)values.GetValue(random.Next(values.Length))!;
+        product.AddCategory(randomCategory);
         return product;
     }
 
-    public static Category CreateCategory(int i)
+    public static Product CreateProductWithUser(int i, long userId)
     {
-        var category = Category.Create($"Category {i}");
-        return category;
+        var product = Product.Create($"Product {i}", $"Description {i}", Price.Create(i, "MYR"), i, null);
+        var values = Enum.GetValues<ProductCategory>();
+        var random = new Random();
+        var randomCategory = (ProductCategory)values.GetValue(random.Next(values.Length))!;
+        product.AddCategory(randomCategory);
+        product.UserId = userId;
+        return product;
     }
 
     public static Role CreateRole(int i)
@@ -90,5 +98,10 @@ public class RepositoryUtils : BaseRepositoryTests
         var password = Password.Create([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
         var user = User.Create($"Firstname {i}", $"Lastname {i}", $"{i}@email.com", password: password);
         return user;
+    }
+
+    public void Dispose()
+    {
+        this._uow.Dispose();
     }
 }

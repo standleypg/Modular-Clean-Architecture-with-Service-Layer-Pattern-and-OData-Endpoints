@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RetailPortal.DataFacade.Auth;
 using RetailPortal.DataFacade.Data.UnitOfWork;
@@ -8,17 +7,21 @@ using RetailPortal.Model.Db.Entities.Common;
 using RetailPortal.Model.DTOs.Auth;
 using RetailPortal.Model.DTOs.Common;
 using RetailPortal.ServiceFacade.Auth;
+using RetailPortal.ServiceFacade.Validator.Common;
 
 namespace RetailPortal.Service.Services.Auth;
 
 public class TokenExchangeService(
     IUnitOfWork uow,
     IJwtTokenGenerator jwtTokenGenerator,
-    IValidator<TokenExchangeRequest> validator) : ITokenExchangeService
+    IValidator validator) : ITokenExchangeService
 {
     public async Task<Result<AuthResponse, string>> ExchangeToken(TokenExchangeRequest request, CancellationToken cancellationToken = default)
     {
-        await validator.ValidateAndThrowAsync(request, cancellationToken);
+        if(await validator.ValidateAndExecuteAsync(request, cancellationToken) is { IsSuccess: false} validationError)
+        {
+            return validationError.ConvertFailure<TokenExchangeRequest, AuthResponse>();
+        }
 
         var name = request.Name.AsSpan();
         var firstName = name[..name.IndexOf(' ')].ToString();

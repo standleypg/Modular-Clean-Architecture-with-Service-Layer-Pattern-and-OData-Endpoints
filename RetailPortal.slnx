@@ -37,10 +37,10 @@
   <Folder Name="/Source/ServiceFacade/">
     <Project Path="Source/ServiceFacade/RetailPortal.ServiceFacade/RetailPortal.ServiceFacade.csproj" />
   </Folder>
-<!--  <Folder Name="/Source/Tests/">-->
-<!--    <Project Path="Source/Tests/RetailPortal.Application.UnitTests/RetailPortal.Application.UnitTests.csproj" />-->
-<!--    <Project Path="Source/Tests/RetailPortal.Infrastructure.UnitTests/RetailPortal.Infrastructure.UnitTests.csproj" />-->
-<!--  </Folder>-->
+  <Folder Name="/Source/Tests/">
+    <Project Path="Source/Tests/RetailPortal.Data.UnitTests/RetailPortal.Data.UnitTests.csproj" />
+    <Project Path="Source/Tests/RetailPortal.Service.UnitTests/RetailPortal.Service.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/Workers/">
     <Project Path="Workers/RetailPortal.MigrationService/RetailPortal.MigrationService.csproj" />
   </Folder>

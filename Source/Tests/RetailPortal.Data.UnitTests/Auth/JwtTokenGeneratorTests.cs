@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using Moq;
-using RetailPortal.Domain.Interfaces.Infrastructure.Services;
-using RetailPortal.Infrastructure.Auth;
-using RetailPortal.Infrastructure.UnitTests.Data.Repositories.Common;
+using RetailPortal.Data.Auth;
+using RetailPortal.DataFacade.Services;
+using RetailPortal.Infrastructure.UnitTests.Common;
 using RetailPortal.Model.Constants;
 
 namespace RetailPortal.Infrastructure.UnitTests.Auth;

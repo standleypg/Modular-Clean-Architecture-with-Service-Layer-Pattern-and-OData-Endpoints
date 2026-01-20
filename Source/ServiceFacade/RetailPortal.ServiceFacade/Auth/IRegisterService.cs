@@ -5,5 +5,5 @@ namespace RetailPortal.ServiceFacade.Auth;
 
 public interface IRegisterService
 {
-    Task<Result<AuthResponse, string>> Register(RegisterRequest command, CancellationToken cancellationToken = default);
+    Task<Result<AuthResponse, string>> Register(RegisterRequest request, CancellationToken cancellationToken = default);
 }

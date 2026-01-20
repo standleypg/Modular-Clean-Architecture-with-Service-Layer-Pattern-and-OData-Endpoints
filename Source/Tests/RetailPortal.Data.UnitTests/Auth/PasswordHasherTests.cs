@@ -1,4 +1,4 @@
-﻿using RetailPortal.Infrastructure.Auth;
+﻿using RetailPortal.Data.Auth;
 
 namespace RetailPortal.Infrastructure.UnitTests.Auth;
 
