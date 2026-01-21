@@ -13,7 +13,7 @@ public abstract class IsolatedDatabaseTestBase : IAsyncLifetime, IDisposable
     public virtual Task InitializeAsync()
     {
         this.Fixture = new TestDbFixture();
-        this.RepositoryUtils = new RepositoryUtils(this.Fixture.ContextFactory);
+        this.RepositoryUtils = new RepositoryUtils(this.Fixture.SharedContext);
         return Task.CompletedTask;
     }
 
