@@ -8,30 +8,35 @@ using RetailPortal.Service.Services.Product;
 
 namespace RetailPortal.Service.UnitTests.Products;
 
-public sealed class ProductServiceTests : IDisposable
+public sealed class ProductServiceTests : IsolatedDatabaseTestBase
 {
-    private readonly Mock<IReadOnlyRepository<Product>> _mockReadOnlyProductRepository;
-    private readonly ProductService _sut;
-    private readonly RepositoryUtils _repositoryUtils;
+    private Mock<IReadOnlyRepository<Product>> _mockReadOnlyProductRepository = null!;
+    private ProductService _sut = null!;
     private long _testUserId;
 
-    public ProductServiceTests()
+    public override Task InitializeAsync()
     {
+        base.InitializeAsync();
+
         Mock<IAggregateRepository<Product>> mockProductAggregateRepository = new();
         this._mockReadOnlyProductRepository = new Mock<IReadOnlyRepository<Product>>();
-        this._repositoryUtils = new RepositoryUtils();
+
         Mock<IUnitOfWork> mockUow = new();
         mockUow.Setup(u => u.Products).Returns(mockProductAggregateRepository.Object);
+
         Mock<IReadStore> mockReadStore = new();
         mockReadStore.Setup(r => r.Product).Returns(this._mockReadOnlyProductRepository.Object);
+
         this._sut = new ProductService(mockUow.Object, mockReadStore.Object);
+
+        return Task.CompletedTask;
     }
 
     private async Task EnsureTestUserExists()
     {
         if (this._testUserId == 0)
         {
-            var users = await this._repositoryUtils.CreateQueryableMockEntities(
+            var users = await RepositoryUtils.CreateQueryableMockEntities(
                 RepositoryUtils.CreateUser,
                 uow => uow.Users
             );
@@ -84,11 +89,13 @@ public sealed class ProductServiceTests : IDisposable
         var expectedErrorMessage = "Test exception message";
 
         // Act
-        var result = await this._sut.GetAllProduct<List<Product>>(_ => throw new InvalidOperationException(expectedErrorMessage));
+        var result =
+            await this._sut.GetAllProduct<List<Product>>(_ => throw new InvalidOperationException(expectedErrorMessage));
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Contains(expectedErrorMessage, result.Errors[Result<List<Product>, string>.DefaultErrorKey].First(), StringComparison.InvariantCultureIgnoreCase);
+        Assert.Contains(expectedErrorMessage, result.Errors[Result<List<Product>, string>.DefaultErrorKey].First(),
+            StringComparison.InvariantCultureIgnoreCase);
     }
 
     [Fact]
@@ -97,7 +104,7 @@ public sealed class ProductServiceTests : IDisposable
         // Arrange
         var productCount = 5;
         var products = await this.CreateQueryableProductMockEntities(productCount);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        _mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
         IQueryable<Product>? capturedQueryable = null;
 
         // Act
@@ -138,26 +145,23 @@ public sealed class ProductServiceTests : IDisposable
         this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
 
         // Act
-        var result = await this._sut.GetAllProduct(async queryable => await Task.FromResult(queryable.Select(p => p.Name).ToList()));
+        var result = await _sut.GetAllProduct(async queryable =>
+            await Task.FromResult(queryable.Select(p => p.Name).ToList()));
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(productCount, result.Value.Count);
-        Assert.All(result.Value, name => Assert.StartsWith("Product", name, StringComparison.InvariantCultureIgnoreCase));
+        Assert.All(result.Value,
+            name => Assert.StartsWith("Product", name, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private async Task<IQueryable<Product>> CreateQueryableProductMockEntities(int productCount)
     {
         await this.EnsureTestUserExists();
-        return await this._repositoryUtils.CreateQueryableMockEntities(
+        return await this.RepositoryUtils.CreateQueryableMockEntities(
             _ => RepositoryUtils.CreateProductWithUser(0, this._testUserId),
             uow => uow.Products,
             productCount
         );
-    }
-
-    public void Dispose()
-    {
-        this._repositoryUtils.Dispose();
     }
 }

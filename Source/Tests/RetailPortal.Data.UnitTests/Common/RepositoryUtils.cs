@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using RetailPortal.Data.Db.Context;
 using RetailPortal.Data.Db.UnitOfWork;
 using RetailPortal.DataFacade.Data.Repositories;
 using RetailPortal.DataFacade.Data.UnitOfWork;
@@ -8,22 +10,18 @@ using RetailPortal.Model.Db.Entities.Common.ValueObjects;
 
 namespace RetailPortal.Infrastructure.UnitTests.Common;
 
-public class RepositoryUtils : BaseRepositoryTests, IDisposable
+public class RepositoryUtils(IDbContextFactory<ApplicationDbContext> contextFactory)
 {
-    private readonly UnitOfWork _uow;
-
-    public RepositoryUtils()
-    {
-        this._uow = new UnitOfWork(this.Context);
-    }
-
     public async Task<IQueryable<TEntity>> CreateQueryableMockEntities<TEntity>(
         Func<int, TEntity> createEntity,
         Func<IUnitOfWork, IAggregateRepository<TEntity>> resolveRepository,
         int count = 1,
         CancellationToken cancellationToken = default) where TEntity : EntityBase
     {
-        var repository = resolveRepository(this._uow);
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var uow = new UnitOfWork(context);
+
+        var repository = resolveRepository(uow);
 
         for (int i = 0; i < count; i++)
         {
@@ -31,9 +29,9 @@ public class RepositoryUtils : BaseRepositoryTests, IDisposable
             repository.Add(entity);
         }
 
-        await this._uow.SaveChangesAsync(cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
 
-        return repository.GetAll();
+        return repository.GetAll().ToList().AsQueryable();
     }
 
     public async Task<IQueryable<TEntity>> CreateQueryableMockEntities<TEntity>(
@@ -41,19 +39,22 @@ public class RepositoryUtils : BaseRepositoryTests, IDisposable
         Func<IUnitOfWork, IAggregateRepository<TEntity>> resolveRepository,
         CancellationToken cancellationToken = default) where TEntity : EntityBase
     {
-        var repository = resolveRepository(this._uow);
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var uow = new UnitOfWork(context);
+        var repository = resolveRepository(uow);
 
         foreach (var entity in entities)
         {
             repository.Add(entity);
         }
 
-        await this._uow.SaveChangesAsync(cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
 
-        return repository.GetAll();
+        return repository.GetAll().ToList().AsQueryable();
     }
 
-    public static async Task CreateEntity<T>(Func<int, T> createEntity, Func<T, CancellationToken, Task>? execute, int count = 1,
+    public static async Task CreateEntity<T>(IUnitOfWork uow, Func<int, T> createEntity,
+        Func<T, CancellationToken, Task>? execute, int count = 1,
         CancellationToken cancellationToken = default)
     {
         for (var i = 1; i <= count; i++)
@@ -98,10 +99,5 @@ public class RepositoryUtils : BaseRepositoryTests, IDisposable
         var password = Password.Create([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
         var user = User.Create($"Firstname {i}", $"Lastname {i}", $"{i}@email.com", password: password);
         return user;
-    }
-
-    public void Dispose()
-    {
-        this._uow.Dispose();
     }
 }

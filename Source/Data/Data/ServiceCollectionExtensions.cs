@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
 
         private void AddDbContext(IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddPooledDbContextFactory<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(configuration.GetConnectionString("RetailPortalDb"));
             });
