@@ -17,7 +17,7 @@ public partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext>
     internal AggregateRepository<Product> Products => new(
         this.Set<Product>(),
         this.Set<Product>()
-            .Include(p => this.Users)
+            .Include(p => p.User)
     );
 
     internal AggregateRepository<Role> Roles => new(

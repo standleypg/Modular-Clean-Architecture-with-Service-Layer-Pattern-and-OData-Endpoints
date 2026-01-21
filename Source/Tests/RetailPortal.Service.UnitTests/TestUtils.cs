@@ -5,14 +5,14 @@ using Microsoft.OData.ModelBuilder;
 using Microsoft.OData.UriParser;
 using RetailPortal.Model.Db.Entities.Common.Base;
 
-namespace RetailPortal.Unit;
+namespace RetailPortal.Service.UnitTests;
 
 public static class TestUtils
 {
     public static ODataQueryOptions<T> ODataQueryOptionsUtils<T>(int top = 0, bool includeSelectQuery = false)
         where T : EntityBase
     {
-        var edmModel = TestUtils.CreateEdmModel<T>();
+        var edmModel = CreateEdmModel<T>();
         var queryContext = new ODataQueryContext(edmModel, typeof(T), new ODataPath());
         var httpContext = new DefaultHttpContext
         {

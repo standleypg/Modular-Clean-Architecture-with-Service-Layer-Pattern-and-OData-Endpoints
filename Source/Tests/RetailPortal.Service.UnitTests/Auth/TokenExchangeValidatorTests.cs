@@ -1,8 +1,8 @@
 using FluentValidation.TestHelper;
-using RetailPortal.Application.Auth.Commands.TokenExchange;
 using RetailPortal.Model.DTOs.Auth;
+using RetailPortal.Service.Validators;
 
-namespace RetailPortal.Unit.Auth.Commands.TokenExchange;
+namespace RetailPortal.Service.UnitTests.Auth;
 
 public class TokenExchangeValidatorTests
 {
