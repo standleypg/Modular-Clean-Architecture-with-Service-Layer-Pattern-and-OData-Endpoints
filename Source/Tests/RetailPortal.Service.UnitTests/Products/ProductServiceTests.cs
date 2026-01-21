@@ -14,9 +14,9 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     private ProductService _sut = null!;
     private long _testUserId;
 
-    public override Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
-        base.InitializeAsync();
+        await base.InitializeAsync();
 
         Mock<IAggregateRepository<Product>> mockProductAggregateRepository = new();
         this._mockReadOnlyProductRepository = new Mock<IReadOnlyRepository<Product>>();
@@ -28,15 +28,13 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
         mockReadStore.Setup(r => r.Product).Returns(this._mockReadOnlyProductRepository.Object);
 
         this._sut = new ProductService(mockUow.Object, mockReadStore.Object);
-
-        return Task.CompletedTask;
     }
 
     private async Task EnsureTestUserExists()
     {
         if (this._testUserId == 0)
         {
-            var users = await RepositoryUtils.CreateQueryableMockEntities(
+            var users = await this.RepositoryUtils.CreateQueryableMockEntities(
                 RepositoryUtils.CreateUser,
                 uow => uow.Users
             );
