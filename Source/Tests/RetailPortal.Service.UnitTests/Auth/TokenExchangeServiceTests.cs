@@ -13,16 +13,15 @@ public class TokenExchangeServiceTests
     private readonly TokenExchangeService _sut;
     private readonly Mock<IUnitOfWork> _uowMock;
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
-    private readonly Mock<IValidator> _validatorMock;
 
     public TokenExchangeServiceTests()
     {
         this._uowMock = new Mock<IUnitOfWork>();
         this._jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
-        this._validatorMock = new Mock<IValidator>();
+        Mock<IValidator> validatorMock = new();
 
         this._sut = new TokenExchangeService(this._uowMock.Object, this._jwtTokenGeneratorMock.Object,
-            this._validatorMock.Object);
+            validatorMock.Object);
     }
 
     [Fact]

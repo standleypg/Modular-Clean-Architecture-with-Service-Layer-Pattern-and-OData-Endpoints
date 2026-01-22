@@ -8,38 +8,15 @@ using RetailPortal.Service.Services.Product;
 
 namespace RetailPortal.Service.UnitTests.Products;
 
-public sealed class ProductServiceTests : IsolatedDatabaseTestBase
+public sealed class ProductServiceTests : ServiceTestBase
 {
-    private Mock<IReadOnlyRepository<Product>> _mockReadOnlyProductRepository = null!;
-    private ProductService _sut = null!;
-    private long _testUserId;
+    private readonly Mock<IReadStore> _readStoreMock;
+    private readonly ProductService _sut;
 
-    public override async Task InitializeAsync()
+    public ProductServiceTests()
     {
-        await base.InitializeAsync();
-
-        Mock<IAggregateRepository<Product>> mockProductAggregateRepository = new();
-        this._mockReadOnlyProductRepository = new Mock<IReadOnlyRepository<Product>>();
-
-        Mock<IUnitOfWork> mockUow = new();
-        mockUow.Setup(u => u.Products).Returns(mockProductAggregateRepository.Object);
-
-        Mock<IReadStore> mockReadStore = new();
-        mockReadStore.Setup(r => r.Product).Returns(this._mockReadOnlyProductRepository.Object);
-
-        this._sut = new ProductService(mockUow.Object, mockReadStore.Object);
-    }
-
-    private async Task EnsureTestUserExists()
-    {
-        if (this._testUserId == 0)
-        {
-            var users = await this.RepositoryUtils.CreateQueryableMockEntities(
-                RepositoryUtils.CreateUser,
-                uow => uow.Users
-            );
-            this._testUserId = users.First().Id;
-        }
+        (Mock<IUnitOfWork> uowMock, this._readStoreMock) = CreateUowAndReadStoreMocks();
+        this._sut = new ProductService(uowMock.Object, this._readStoreMock.Object);
     }
 
     [Fact]
@@ -47,8 +24,8 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     {
         // Arrange
         var productCount = 10;
-        var products = await this.CreateQueryableProductMockEntities(productCount);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        this._readStoreMock.Setup(r => r.Product.GetAll())
+            .Returns(this.CreateProductEntities(productCount));
 
         // Act
         var result = await this._sut.GetAllProduct(async queryable =>
@@ -65,10 +42,7 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     [Fact]
     public async Task GetAllProduct_ShouldReturnSuccess_WhenNoProductsExist()
     {
-        // Arrange
-        var productCount = 0;
-        var products = await this.CreateQueryableProductMockEntities(productCount);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        // Arrange - no products created
 
         // Act
         var result = await this._sut.GetAllProduct(async queryable => await Task.FromResult(queryable.ToList()));
@@ -82,13 +56,14 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     public async Task GetAllProduct_ShouldReturnFailure_WhenExecuteAsyncThrowsException()
     {
         // Arrange
-        var products = await this.CreateQueryableProductMockEntities(5);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        this._readStoreMock.Setup(r => r.Product.GetAll())
+            .Returns(this.CreateProductEntities(5));
         var expectedErrorMessage = "Test exception message";
 
         // Act
         var result =
-            await this._sut.GetAllProduct<List<Product>>(_ => throw new InvalidOperationException(expectedErrorMessage));
+            await this._sut.GetAllProduct<List<Product>>(_ =>
+                throw new InvalidOperationException(expectedErrorMessage));
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -101,8 +76,8 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     {
         // Arrange
         var productCount = 5;
-        var products = await this.CreateQueryableProductMockEntities(productCount);
-        _mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        this._readStoreMock.Setup(r => r.Product.GetAll())
+            .Returns(this.CreateProductEntities(productCount));
         IQueryable<Product>? capturedQueryable = null;
 
         // Act
@@ -123,11 +98,12 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     {
         // Arrange
         var productCount = 10;
-        var products = await this.CreateQueryableProductMockEntities(productCount);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        this._readStoreMock.Setup(r => r.Product.GetAll())
+            .Returns(this.CreateProductEntities(productCount));
 
         // Act
-        var result = await this._sut.GetAllProduct(async queryable => await Task.FromResult(queryable.Take(3).ToList()));
+        var result =
+            await this._sut.GetAllProduct(async queryable => await Task.FromResult(queryable.Take(3).ToList()));
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -139,11 +115,11 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
     {
         // Arrange
         var productCount = 5;
-        var products = await this.CreateQueryableProductMockEntities(productCount);
-        this._mockReadOnlyProductRepository.Setup(r => r.GetAll()).Returns(products);
+        this._readStoreMock.Setup(r => r.Product.GetAll())
+            .Returns(this.CreateProductEntities(productCount));
 
         // Act
-        var result = await _sut.GetAllProduct(async queryable =>
+        var result = await this._sut.GetAllProduct(async queryable =>
             await Task.FromResult(queryable.Select(p => p.Name).ToList()));
 
         // Assert
@@ -153,12 +129,14 @@ public sealed class ProductServiceTests : IsolatedDatabaseTestBase
             name => Assert.StartsWith("Product", name, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private async Task<IQueryable<Product>> CreateQueryableProductMockEntities(int productCount)
+    private IQueryable<Product> CreateProductEntities(int productCount)
     {
-        await this.EnsureTestUserExists();
-        return await this.RepositoryUtils.CreateQueryableMockEntities(
-            _ => RepositoryUtils.CreateProductWithUser(0, this._testUserId),
-            uow => uow.Products,
+        this.RepositoryUtils.CreateQueryableMockEntities(
+            RepositoryUtils.CreateUser
+        );
+
+        return this.RepositoryUtils.CreateQueryableMockEntities(
+            RepositoryUtils.CreateProduct,
             productCount
         );
     }

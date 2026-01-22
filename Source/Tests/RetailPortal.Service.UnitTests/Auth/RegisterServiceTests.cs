@@ -11,7 +11,7 @@ using RetailPortal.ServiceFacade.Validator.Common;
 
 namespace RetailPortal.Service.UnitTests.Auth;
 
-public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
+public sealed class RegisterServiceTests : ServiceTestBase
 {
     private readonly RegisterService _sut;
     private readonly Mock<IUnitOfWork> _uowMock;
@@ -21,7 +21,7 @@ public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
 
     public RegisterServiceTests()
     {
-        this._uowMock = new Mock<IUnitOfWork>();
+        (this._uowMock, _) = CreateUowAndReadStoreMocks();
         this._jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
         this._passwordHasherMock = new Mock<IPasswordHasher>();
         this._mockValidator = new Mock<IValidator>();
@@ -32,11 +32,6 @@ public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
             this._passwordHasherMock.Object,
             this._mockValidator.Object
         );
-    }
-
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
     }
 
     [Fact]
@@ -50,7 +45,7 @@ public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
         var result = await this._sut.Register(request, It.IsAny<CancellationToken>());
 
         // Assert
-        Assert.True(!result.IsSuccess);
+        Assert.False(result.IsSuccess);
         Assert.Equal(new Dictionary<string, List<string>> { { "errors", ["Email is already in use."] } },
             result.Errors);
     }
@@ -61,7 +56,7 @@ public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
         // Arrange
         var (_, request) = CreateUser();
         this._uowMock.Setup(u => u.Users.GetAll()).Returns(Enumerable.Empty<User>().AsQueryable());
-        this._uowMock.Setup(u => u.Roles.GetAll()).Returns(await this.CreateQueryableRoleMockEntities());
+        this._uowMock.Setup(u => u.Roles.GetAll()).Returns(this.CreateQueryableRoleMockEntities());
         this._passwordHasherMock.Setup(p =>
             p.CreatePasswordHash(It.IsAny<string>(), out It.Ref<byte[]>.IsAny, out It.Ref<byte[]>.IsAny));
         this._jwtTokenGeneratorMock.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("token");
@@ -102,14 +97,13 @@ public sealed class RegisterServiceTests : IsolatedDatabaseTestBase
         return (user.AsQueryable(), request);
     }
 
-    private Task<IQueryable<Role>> CreateQueryableRoleMockEntities()
+    private IQueryable<Role> CreateQueryableRoleMockEntities()
     {
-        var roles = (from role in Enum.GetValues<Roles>()
-            where role != Roles.Seller
-            select Role.Create(role.ToString(), $"{role} role")).ToList();
-        return this.RepositoryUtils.CreateQueryableMockEntities(
-            roles,
-            uow => uow.Roles
-        );
+        var roles = Enum.GetValues<Roles>()
+            .Where(role => role != Roles.Seller)
+            .Select(role => Role.Create(role.ToString(), $"{role} role"))
+            .ToList();
+
+        return this.RepositoryUtils.CreateQueryableMockEntities(roles);
     }
 }
