@@ -4,10 +4,11 @@ using RetailPortal.Data.Auth;
 using RetailPortal.DataFacade.Services;
 using RetailPortal.Infrastructure.UnitTests.Common;
 using RetailPortal.Model.Constants;
+using RetailPortal.Model.Db.Entities;
 
 namespace RetailPortal.Infrastructure.UnitTests.Auth;
 
-public class JwtTokenGeneratorTests
+public class JwtTokenGeneratorTests: ServiceTestBase
 {
     private readonly JwtTokenGenerator _sut;
 
@@ -28,10 +29,10 @@ public class JwtTokenGeneratorTests
     public void GenerateToken_ShouldReturnToken()
     {
         // Arrange
-        var user = RepositoryUtils.CreateUser(1);
+        var user = this.RepositoryUtils.MockEntities<User>();
 
         // Act
-        var token = this._sut.GenerateToken(user);
+        var token = this._sut.GenerateToken(user.First());
 
         // Assert
         Assert.NotNull(token);

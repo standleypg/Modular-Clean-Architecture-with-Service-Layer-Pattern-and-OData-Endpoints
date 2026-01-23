@@ -131,13 +131,8 @@ public sealed class ProductServiceTests : ServiceTestBase
 
     private IQueryable<Product> CreateProductEntities(int productCount)
     {
-        this.RepositoryUtils.CreateQueryableMockEntities(
-            RepositoryUtils.CreateUser
-        );
+        this.RepositoryUtils.MockEntities<User>();
 
-        return this.RepositoryUtils.CreateQueryableMockEntities(
-            RepositoryUtils.CreateProduct,
-            productCount
-        );
+        return this.RepositoryUtils.MockEntities<Product>(productCount);
     }
 }
