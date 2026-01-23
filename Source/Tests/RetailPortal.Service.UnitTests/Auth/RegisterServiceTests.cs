@@ -99,11 +99,6 @@ public sealed class RegisterServiceTests : ServiceTestBase
 
     private IQueryable<Role> CreateQueryableRoleMockEntities()
     {
-        var roles = Enum.GetValues<Roles>()
-            .Where(role => role != Roles.Seller)
-            .Select(role => Role.Create(role.ToString(), $"{role} role"))
-            .ToList();
-
-        return this.RepositoryUtils.CreateQueryableMockEntities(roles);
+        return this.RepositoryUtils.MockEntitiesFromEnum<Roles, Role>();
     }
 }
