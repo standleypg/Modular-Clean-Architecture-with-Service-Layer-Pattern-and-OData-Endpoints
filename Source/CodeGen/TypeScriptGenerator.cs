@@ -1,130 +1,120 @@
-﻿using System.Reflection;
-using System.Text.Json;
-using System.Text.RegularExpressions;
+﻿using CodeGen.Configuration;
+using CodeGen.Discovery;
+using CodeGen.Formatters;
+using CodeGen.Processing;
+using CodeGen.Utilities;
+using Microsoft.Extensions.Logging;
 using TypeLitePlus;
-using TypeLitePlus.TsModels;
 
 namespace CodeGen;
 
-public class TypeScriptGenerator
+/// <summary>
+/// Generates TypeScript type definitions from C# types using TypeLite.
+/// Orchestrates type discovery, formatting, and code generation.
+/// </summary>
+public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptGenerator>? logger = null)
 {
-    private static TypeScriptGenConfig? _config;
+    private readonly TypeScriptGenConfig _config = config ?? throw new ArgumentNullException(nameof(config));
+    private readonly TypeDiscovery _typeDiscovery = new(config, logger);
+    private readonly TypeFormatter _typeFormatter = new(logger);
+    private readonly PathResolver _pathResolver = new(config);
 
-    private static void LoadConfig()
+    /// <summary>
+    /// Generates TypeScript definition files from configured C# types.
+    /// </summary>
+    public void Generate()
     {
-        string configPath = Path.Combine(AppContext.BaseDirectory, "typescriptgenconfig.json");
-        if (File.Exists(configPath))
-        {
-            var json = File.ReadAllText(configPath);
-            _config = JsonSerializer.Deserialize<TypeScriptGenConfig>(json);
-            Console.WriteLine("Config loaded successfully.");
-        }
-        else
-        {
-            throw new FileNotFoundException("Config file not found.", configPath);
-        }
-    }
-
-    public static void GenerateTypeScript()
-    {
-        LoadConfig();
-
-        if (_config?.Namespaces == null || _config.Namespaces.Count == 0)
-        {
-            Console.WriteLine("No namespaces specified in config. Nothing to generate.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_config.OutputPath))
-        {
-            Console.WriteLine("Output path not specified in config.");
-            return;
-        }
-
-        var sharedAssembly = Assembly.Load("RetailPortal.Model");
-
-        var modelBuilder = new TsModelBuilder();
-
-        foreach (var nsConfig in _config.Namespaces)
-        {
-            var g = sharedAssembly.GetTypes().ToList();
-            var types = sharedAssembly.GetTypes()
-                .Where(t => t.Namespace == nsConfig.Namespace && nsConfig.IncludeDtos.Any(dto =>
-                    t.Name.StartsWith(dto, StringComparison.InvariantCultureIgnoreCase) ||
-                    t.Name.EndsWith(dto, StringComparison.InvariantCultureIgnoreCase)))
-                .ToList();
-
-            foreach (var type in types)
-            {
-                modelBuilder.Add(type);
-            }
-        }
-
-        var model = modelBuilder.Build();
-        var visitor = new Visitor();
-        model.RunVisitor(visitor);
-
-        var generator = new TsGenerator();
-        generator.SetIdentifierFormatter(formatter => !string.IsNullOrEmpty(formatter.Name)
-            ? char.ToLowerInvariant(formatter.Name[0]) + formatter.Name.Substring(1) // Convert to camelCase
-            : formatter.Name);
-        generator.SetMemberTypeFormatter((formatter, name) =>
-            name == "System.iGuid" ? "string" : name
-        );
-
-        generator.SetModuleNameFormatter(formatter =>
-        {
-            foreach (var formatterClass in formatter.Members)
-            {
-                if (formatterClass.Name.StartsWith('i')) continue;
-                if (formatterClass.Name == "T") continue; // enforce generic type name
-                formatterClass.Name = "i" + formatterClass.Name;
-            }
-
-            return formatter.Name;
-        });
-
-        generator.SetTypeVisibilityFormatter((formatter, name) =>
-        {
-            if (name == "iGuid")
-            {
-                formatter.Module = null;
-                formatter.Properties.Clear();
-                formatter.Fields.Clear();
-                formatter.Interfaces.Clear();
-                return false;
-            }
-
-            return true;
-        });
-
-        var tsCode = generator.Generate(model, TsGeneratorOutput.Properties | TsGeneratorOutput.Enums);
-        tsCode = Regex.Replace(tsCode, @"declare\s+namespace\s+System\s*{\s*interface\s+iGuid\s*{\s*}\s*}",
-            string.Empty).Trim();
-        tsCode = tsCode.Replace("export const enum", "export enum", StringComparison.InvariantCultureIgnoreCase);
-        var baseDirectory = Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.Parent?.FullName;
-
-        if (baseDirectory == null)
-        {
-            throw new InvalidOperationException("Failed to determine base directory.");
-        }
-
-        var outputPath = Path.GetFullPath(_config.OutputPath, baseDirectory);
-        var outputDir = Path.GetDirectoryName(outputPath);
-        if (outputDir != null) Directory.CreateDirectory(outputDir);
-
         try
         {
-            if (outputDir != null)
+            logger?.LogInformation("Starting TypeScript generation...");
+
+            var assembly = this._typeDiscovery.LoadAssembly(this._config.AssemblyName);
+            var types = this._typeDiscovery.DiscoverTypes(assembly);
+
+            if (types.Count == 0)
             {
-                string outputFile = Path.Combine(outputDir, _config.OutputFileName);
-                File.WriteAllText(outputFile, tsCode);
-                Console.WriteLine($"TypeScript models generated at {_config.OutputPath}");
+                logger?.LogWarning("No types found matching the configured patterns. Nothing to generate.");
+                return;
             }
+
+            logger?.LogInformation("Found {TypeCount} types to generate", types.Count);
+
+            var model = this.BuildTypeScriptModel(types);
+            var tsCode = this.GenerateTypeScriptCode(model);
+            var outputPath = this.WriteOutputFile(tsCode);
+
+            logger?.LogInformation("TypeScript models successfully generated at: {OutputPath}", outputPath);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to generate TypeScript models: {ex.Message}");
+            logger?.LogError(ex, "Failed to generate TypeScript models");
+            throw;
         }
+    }
+
+    /// <summary>
+    /// Builds the TypeScript model from discovered types.
+    /// </summary>
+    private TsModel BuildTypeScriptModel(List<Type> types)
+    {
+        var modelBuilder = new TsModelBuilder();
+
+        foreach (var type in types)
+        {
+            logger?.LogDebug("Adding type to model: {TypeName}", type.FullName);
+            modelBuilder.Add(type);
+        }
+
+        return modelBuilder.Build();
+    }
+
+    /// <summary>
+    /// Generates TypeScript code from the model.
+    /// </summary>
+    private string GenerateTypeScriptCode(TsModel model)
+    {
+        var generator = this.ConfigureGenerator();
+        var tsCode = generator.Generate(model, TsGeneratorOutput.Properties | TsGeneratorOutput.Enums);
+
+        // Post-processing for cleanup
+        return CodePostProcessor.Process(tsCode);
+    }
+
+    /// <summary>
+    /// Configures the TypeScript generator with custom formatters.
+    /// </summary>
+    private TsGenerator ConfigureGenerator()
+    {
+        // Disable const enums for better TypeScript compatibility
+        var generator = new TsGenerator { GenerateConstEnums = false };
+
+        // Set up formatters
+        generator.SetIdentifierFormatter(IdentifierFormatter.FormatPropertyName);
+        generator.SetMemberTypeFormatter((prop, typeName) => this._typeFormatter.FormatMemberType(prop, typeName));
+        generator.SetModuleNameFormatter(IdentifierFormatter.FormatModuleName);
+        generator.SetTypeVisibilityFormatter((tsClass, typeName) => TypeVisibilityFormatter.IsTypeVisible(typeName));
+
+        return generator;
+    }
+
+    /// <summary>
+    /// Writes the generated TypeScript code to the output file.
+    /// </summary>
+    private string WriteOutputFile(string tsCode)
+    {
+        var outputPath = _pathResolver.ResolveOutputPath();
+        var outputDirectory = Path.GetDirectoryName(outputPath);
+
+        if (string.IsNullOrEmpty(outputDirectory))
+        {
+            throw new InvalidOperationException("Could not determine output directory from path.");
+        }
+
+        Directory.CreateDirectory(outputDirectory);
+
+        logger?.LogDebug("Writing output to: {OutputPath}", outputPath);
+        File.WriteAllText(outputPath, tsCode);
+
+        return outputPath;
     }
 }
