@@ -9,7 +9,6 @@
     </Project>
   </Folder>
   <Folder Name="/Source/">
-    <Project Path="Source/CodeGen/CodeGen.csproj" />
     <Project Path="Source/RetailPortal.ApiConfiguration/RetailPortal.ApiConfiguration.csproj" />
   </Folder>
   <Folder Name="/Source/Data/">

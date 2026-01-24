@@ -3,14 +3,8 @@ using CodeGen.Configuration;
 
 namespace CodeGen.Utilities;
 
-/// <summary>
-/// Handles loading and validating configuration files.
-/// </summary>
 public static class ConfigLoader
 {
-    /// <summary>
-    /// Loads configuration from the specified JSON file.
-    /// </summary>
     public static TypeScriptGenConfig LoadConfig(string? configPath = null)
     {
         configPath ??= Path.Combine(AppContext.BaseDirectory, "typescriptgenconfig.json");
@@ -36,9 +30,6 @@ public static class ConfigLoader
         return config;
     }
 
-    /// <summary>
-    /// Validates the configuration object.
-    /// </summary>
     private static void ValidateConfig(TypeScriptGenConfig config)
     {
         if (string.IsNullOrWhiteSpace(config.AssemblyName))

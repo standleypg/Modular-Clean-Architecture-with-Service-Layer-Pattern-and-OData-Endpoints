@@ -6,7 +6,7 @@ namespace CodeGen.Formatters;
 /// <summary>
 /// Handles TypeScript type formatting and conversions.
 /// </summary>
-public class TypeFormatter(ILogger? logger = null)
+public class TypeFormatter(ILogger logger)
 {
     /// <summary>
     /// Maps C# types to appropriate TypeScript types.
@@ -69,24 +69,22 @@ public class TypeFormatter(ILogger? logger = null)
                 // Check for nullable value types (int?, Guid?, DateTime?, etc.)
                 if (Nullable.GetUnderlyingType(propertyType) != null)
                 {
-                    logger?.LogDebug("Property {Name} is nullable value type", tsprop.Name);
+                    logger.LogDebug("Property {Name} is nullable value type", tsprop.Name);
                     return true;
                 }
 
                 // Check for nullable reference types (string?, MyClass?, etc.) using NullabilityInfoContext
-                #if NET6_0_OR_GREATER
                 try
                 {
                     var context = new System.Reflection.NullabilityInfoContext();
                     var nullabilityInfo = context.Create(propertyInfo);
                     if (nullabilityInfo.ReadState == System.Reflection.NullabilityState.Nullable)
                     {
-                        logger?.LogDebug("Property {Name} is nullable reference type", tsprop.Name);
+                        logger.LogDebug("Property {Name} is nullable reference type", tsprop.Name);
                         return true;
                     }
                 }
                 catch { /* Ignore errors in nullability detection */ }
-                #endif
             }
             else if (clrProperty is System.Reflection.FieldInfo fieldInfo)
             {
@@ -95,7 +93,7 @@ public class TypeFormatter(ILogger? logger = null)
                 // Check for nullable value types
                 if (Nullable.GetUnderlyingType(propertyType) != null)
                 {
-                    logger?.LogDebug("Field {Name} is nullable value type", tsprop.Name);
+                    logger.LogDebug("Field {Name} is nullable value type", tsprop.Name);
                     return true;
                 }
 
@@ -106,7 +104,7 @@ public class TypeFormatter(ILogger? logger = null)
                     var nullabilityInfo = context.Create(fieldInfo);
                     if (nullabilityInfo.ReadState == System.Reflection.NullabilityState.Nullable)
                     {
-                        logger?.LogDebug("Field {Name} is nullable reference type", tsprop.Name);
+                        logger.LogDebug("Field {Name} is nullable reference type", tsprop.Name);
                         return true;
                     }
                 }
@@ -117,7 +115,7 @@ public class TypeFormatter(ILogger? logger = null)
         }
         catch (Exception ex)
         {
-            logger?.LogWarning(ex, "Error checking nullable for property {Name}", tsprop.Name);
+            logger.LogWarning(ex, "Error checking nullable for property {Name}", tsprop.Name);
             return false;
         }
     }
