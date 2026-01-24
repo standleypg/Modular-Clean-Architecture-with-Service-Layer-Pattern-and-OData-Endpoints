@@ -1,0 +1,15 @@
+﻿{
+  "assemblyName": "RetailPortal.Model",
+  "outputPath": "../App/src/app/shared/common",
+  "outputFileName": "model.gen.ts",
+  "includeStaticClasses": false,
+  "namespaces": [
+    {
+      "namespace": "RetailPortal.Model.DTOs",
+      "includeNested": true,
+      "excludeGenericTypes": [
+        "Result"
+      ]
+    }
+  ]
+}

@@ -26,8 +26,14 @@
     <ProjectReference Include="..\..\RetailPortal.ApiConfiguration\RetailPortal.ApiConfiguration.csproj" />
   </ItemGroup>
 
-      <Target Name="GenerateTypeScript" AfterTargets="Build">
-        <Exec Command="dotnet run --project ../../CodeGen/CodeGen.csproj" />
-      </Target>
+  <ItemGroup>
+    <None Include="typescriptgenconfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="GenerateTypeScript" AfterTargets="Build">
+    <Exec Command="genit typescriptgenconfig.json --base-directory $(TargetDir)" />
+  </Target>
 
 </Project>

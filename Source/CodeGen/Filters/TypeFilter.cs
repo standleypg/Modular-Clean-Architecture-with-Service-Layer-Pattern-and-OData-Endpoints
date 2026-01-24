@@ -7,7 +7,7 @@ namespace CodeGen.Filters;
 /// <summary>
 /// Filters types based on configuration rules.
 /// </summary>
-public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
+public class TypeFilter(TypeScriptGenConfig config, ILogger logger)
 {
     /// <summary>
     /// Checks if a type is in the target namespace.
@@ -42,7 +42,7 @@ public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
 
         if (isStaticClass)
         {
-            logger?.LogDebug("Excluding static class: {TypeName}", type.Name);
+            logger.LogDebug("Excluding static class: {TypeName}", type.Name);
             return false;
         }
 
@@ -60,7 +60,7 @@ public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
         {
             if (!MatchesAnyPattern(type.Name, nsConfig.IncludeTypes))
             {
-                logger?.LogTrace("Type {TypeName} excluded: doesn't match includeTypes", type.Name);
+                logger.LogTrace("Type {TypeName} excluded: doesn't match includeTypes", type.Name);
                 return false;
             }
         }
@@ -70,7 +70,7 @@ public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
         {
             if (MatchesAnyPattern(type.Name, nsConfig.ExcludeTypes))
             {
-                logger?.LogDebug("Type {TypeName} excluded: matches excludeTypes", type.Name);
+                logger.LogDebug("Type {TypeName} excluded: matches excludeTypes", type.Name);
                 return false;
             }
         }
@@ -85,7 +85,7 @@ public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
             {
                 if (!MatchesAnyPattern(genericBaseName, nsConfig.IncludeGenericTypes))
                 {
-                    logger?.LogTrace("Generic type {TypeName} excluded: doesn't match includeGenericTypes", type.Name);
+                    logger.LogTrace("Generic type {TypeName} excluded: doesn't match includeGenericTypes", type.Name);
                     return false;
                 }
             }
@@ -95,7 +95,7 @@ public class TypeFilter(TypeScriptGenConfig config, ILogger? logger = null)
             {
                 if (MatchesAnyPattern(genericBaseName, nsConfig.ExcludeGenericTypes))
                 {
-                    logger?.LogDebug("Generic type {TypeName} excluded: matches excludeGenericTypes", type.Name);
+                    logger.LogDebug("Generic type {TypeName} excluded: matches excludeGenericTypes", type.Name);
                     return false;
                 }
             }

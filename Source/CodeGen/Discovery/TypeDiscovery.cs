@@ -5,21 +5,15 @@ using TypeFilter = CodeGen.Filters.TypeFilter;
 
 namespace CodeGen.Discovery;
 
-/// <summary>
-/// Discovers types from assemblies based on configuration.
-/// </summary>
-public class TypeDiscovery(TypeScriptGenConfig config, ILogger? logger = null)
+public class TypeDiscovery(TypeScriptGenConfig config, ILogger logger)
 {
     private readonly TypeFilter _typeFilter = new(config, logger);
 
-    /// <summary>
-    /// Loads the specified assembly.
-    /// </summary>
     public Assembly LoadAssembly(string assemblyName)
     {
         try
         {
-            logger?.LogDebug("Loading assembly: {AssemblyName}", assemblyName);
+            logger.LogDebug("Loading assembly: {AssemblyName}", assemblyName);
             return Assembly.Load(assemblyName);
         }
         catch (Exception ex)
@@ -29,26 +23,22 @@ public class TypeDiscovery(TypeScriptGenConfig config, ILogger? logger = null)
         }
     }
 
-    /// <summary>
-    /// Discovers types from the assembly based on configuration.
-    /// </summary>
     public List<Type> DiscoverTypes(Assembly assembly)
     {
         var discoveredTypes = new List<Type>();
 
         foreach (var nsConfig in config.Namespaces)
         {
-            logger?.LogDebug("Scanning namespace: {Namespace}", nsConfig.Namespace);
+            logger.LogDebug("Scanning namespace: {Namespace}", nsConfig.Namespace);
 
             var types = assembly.GetTypes()
                 .Where(t => TypeFilter.IsInTargetNamespace(t, nsConfig) &&
-                           !t.IsNested &&
-                           t.IsPublic &&
-                           this._typeFilter.IsNotStaticClass(t) &&
-                           this._typeFilter.IsTypeIncluded(t, nsConfig))
+                            t is { IsNested: false, IsPublic: true } &&
+                            this._typeFilter.IsNotStaticClass(t) &&
+                            this._typeFilter.IsTypeIncluded(t, nsConfig))
                 .ToList();
 
-            logger?.LogDebug("Found {Count} types in namespace {Namespace}", types.Count, nsConfig.Namespace);
+            logger.LogDebug("Found {Count} types in namespace {Namespace}", types.Count, nsConfig.Namespace);
             discoveredTypes.AddRange(types);
         }
 

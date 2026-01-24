@@ -5,7 +5,7 @@ namespace CodeGen.Formatters;
 /// <summary>
 /// Handles identifier naming conventions (properties, interfaces, etc.).
 /// </summary>
-public class IdentifierFormatter
+public abstract class IdentifierFormatter
 {
     /// <summary>
     /// Converts property names to camelCase.

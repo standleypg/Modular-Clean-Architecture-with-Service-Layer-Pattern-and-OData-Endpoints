@@ -8,46 +8,39 @@ using TypeLitePlus;
 
 namespace CodeGen;
 
-/// <summary>
-/// Generates TypeScript type definitions from C# types using TypeLite.
-/// Orchestrates type discovery, formatting, and code generation.
-/// </summary>
-public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptGenerator>? logger = null)
+public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptGenerator> logger)
 {
     private readonly TypeScriptGenConfig _config = config ?? throw new ArgumentNullException(nameof(config));
     private readonly TypeDiscovery _typeDiscovery = new(config, logger);
     private readonly TypeFormatter _typeFormatter = new(logger);
     private readonly PathResolver _pathResolver = new(config);
 
-    /// <summary>
-    /// Generates TypeScript definition files from configured C# types.
-    /// </summary>
     public void Generate()
     {
         try
         {
-            logger?.LogInformation("Starting TypeScript generation...");
+            logger.LogInformation("Starting TypeScript generation...");
 
             var assembly = this._typeDiscovery.LoadAssembly(this._config.AssemblyName);
             var types = this._typeDiscovery.DiscoverTypes(assembly);
 
             if (types.Count == 0)
             {
-                logger?.LogWarning("No types found matching the configured patterns. Nothing to generate.");
+                logger.LogWarning("No types found matching the configured patterns. Nothing to generate.");
                 return;
             }
 
-            logger?.LogInformation("Found {TypeCount} types to generate", types.Count);
+            logger.LogInformation("Found {TypeCount} types to generate", types.Count);
 
             var model = this.BuildTypeScriptModel(types);
             var tsCode = this.GenerateTypeScriptCode(model);
             var outputPath = this.WriteOutputFile(tsCode);
 
-            logger?.LogInformation("TypeScript models successfully generated at: {OutputPath}", outputPath);
+            logger.LogInformation("TypeScript models successfully generated at: {OutputPath}", outputPath);
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Failed to generate TypeScript models");
+            logger.LogError(ex, "Failed to generate TypeScript models");
             throw;
         }
     }
@@ -61,7 +54,7 @@ public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptG
 
         foreach (var type in types)
         {
-            logger?.LogDebug("Adding type to model: {TypeName}", type.FullName);
+            logger.LogDebug("Adding type to model: {TypeName}", type.FullName);
             modelBuilder.Add(type);
         }
 
@@ -92,7 +85,7 @@ public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptG
         generator.SetIdentifierFormatter(IdentifierFormatter.FormatPropertyName);
         generator.SetMemberTypeFormatter((prop, typeName) => this._typeFormatter.FormatMemberType(prop, typeName));
         generator.SetModuleNameFormatter(IdentifierFormatter.FormatModuleName);
-        generator.SetTypeVisibilityFormatter((tsClass, typeName) => TypeVisibilityFormatter.IsTypeVisible(typeName));
+        generator.SetTypeVisibilityFormatter((_, typeName) => TypeVisibilityFormatter.IsTypeVisible(typeName));
 
         return generator;
     }
@@ -102,7 +95,7 @@ public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptG
     /// </summary>
     private string WriteOutputFile(string tsCode)
     {
-        var outputPath = _pathResolver.ResolveOutputPath();
+        var outputPath = this._pathResolver.ResolveOutputPath();
         var outputDirectory = Path.GetDirectoryName(outputPath);
 
         if (string.IsNullOrEmpty(outputDirectory))
@@ -112,7 +105,7 @@ public class TypeScriptGenerator(TypeScriptGenConfig config, ILogger<TypeScriptG
 
         Directory.CreateDirectory(outputDirectory);
 
-        logger?.LogDebug("Writing output to: {OutputPath}", outputPath);
+        logger.LogDebug("Writing output to: {OutputPath}", outputPath);
         File.WriteAllText(outputPath, tsCode);
 
         return outputPath;

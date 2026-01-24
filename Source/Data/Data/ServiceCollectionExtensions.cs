@@ -51,6 +51,9 @@ public static class ServiceCollectionExtensions
             {
                 options.UseNpgsql(configuration.GetConnectionString("RetailPortalDb"));
             });
+
+            services.AddScoped<ApplicationDbContext>(sp =>
+                sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
         }
 
         private void AddAuth(IConfiguration configuration)

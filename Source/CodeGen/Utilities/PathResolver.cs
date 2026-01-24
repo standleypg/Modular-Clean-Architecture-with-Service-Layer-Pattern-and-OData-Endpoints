@@ -2,14 +2,8 @@ using CodeGen.Configuration;
 
 namespace CodeGen.Utilities;
 
-/// <summary>
-/// Resolves file paths for output.
-/// </summary>
 public class PathResolver(TypeScriptGenConfig config)
 {
-    /// <summary>
-    /// Resolves the full output path from configuration.
-    /// </summary>
     public string ResolveOutputPath()
     {
         var outputDir = config.OutputPath;
@@ -24,9 +18,6 @@ public class PathResolver(TypeScriptGenConfig config)
         return Path.GetFullPath(Path.Combine(outputDir, config.OutputFileName));
     }
 
-    /// <summary>
-    /// Attempts to find the solution/project base directory.
-    /// </summary>
     private static string FindBaseDirectory()
     {
         var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
