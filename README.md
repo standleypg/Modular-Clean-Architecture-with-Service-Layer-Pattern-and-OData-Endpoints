@@ -49,6 +49,21 @@ After setting up the database, migrations is automatically applied when running 
 dotnet ef database update --project Source/Data/Data
 ```
 
+### TypeScript Code Generation
+
+This project uses [GenItEasy.CLI](https://www.nuget.org/packages/GenItEasy.CLI) to generate TypeScript types from .NET assemblies.
+
+```bash
+# Install the tool
+dotnet tool install GenItEasy.CLI
+
+# Run with config file
+genit typescriptgenconfig.json
+
+# Specify assembly base directory (where the DLLs are)
+genit typescriptgenconfig.json --base-directory bin/Debug/net9.0
+```
+
 ### API Examples
 
 For OData request examples, refer to `Documents/Api.http`. For comprehensive OData query syntax, see the [official OData documentation](https://learn.microsoft.com/en-us/odata/).
@@ -274,7 +289,7 @@ OData is configured per-controller, allowing fine-grained control over queryable
 ### Development Tools
 - **Docker** - Containerization
 - **OpenAPI/Swagger** - API documentation
-- **TypeScript Generator** - Client code generation
+- **[GenItEasy.CLI](https://www.nuget.org/packages/GenItEasy.CLI)** - TypeScript type generation from .NET assemblies
 
 ## Project Roadmap & TODO
 
